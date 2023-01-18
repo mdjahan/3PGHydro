@@ -9,6 +9,8 @@ gammaF1,0
 gammaF0,0
 tgammaF,0
 gammaR,0.001
+leafgrow,5
+leaffall,10
 Tmin,4.3827
 Tmax,35.9017
 Topt,22.5405
