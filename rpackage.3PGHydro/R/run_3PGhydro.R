@@ -53,7 +53,6 @@
 #' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
 #' @export
 run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS){
-  
   ############################################################
   #parameters
   ##############################################################
@@ -63,56 +62,58 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   nWs <- p[4]
   pRx <- p[5]
   pRn <- p[6]
-  gammaF1 <- p[7]
-  gammaF0 <- p[8]
-  tgammaF <- p[9]
-  gammaR <- p[10]
-  Tmin <- p[11]
-  Tmax <- p[12]
-  Topt <- p[13]
-  fCalpha700 <- p[14]
-  fCg700 <- p[15]
-  m0 <- p[16]
-  fN0 <- p[17]
-  fNn <- p[18]
-  MaxAge <- p[19]
-  nAge <- p[20]
-  rAge <- p[21]
-  gammaN1 <- p[22]
-  gammaN0 <- p[23]
-  tgammaN <- p[24]
-  ngammaN <- p[25]
-  wSx1000 <- p[26]
-  thinPower <- p[27]
-  mF <- p[28]
-  mR <- p[29]
-  mS <- p[30]
-  SLA0 <- p[31]
-  SLA1 <- p[32]
-  tSLA <- p[33]
-  k <- p[34]
-  fullCanAge <- p[35]
-  MaxIntcptn <- p[36]
-  LAImaxIntcptn <- p[37]
-  alphaCx <- p[38]
-  y <- p[39]
-  CoeffCond <- p[40] #defines stomatal response to VPD
-  MinCond <- p[41]
-  MaxCond <- p[42] #maximum stomatal conductance integrated over the canopy
-  BLcond <- p[43] #conductance between the canopy layer and the atmoshperic layer
-  LAIgcx <- p[44] #canopy LAI for maximum canopy conductance (stomata conductance)
-  fracBB0 <- p[45]
-  fracBB1 <- p[46]
-  tBB <- p[47]
-  rho0 <- p[48]
-  rho1 <- p[49]
-  tRho <- p[50]
-  aH <- p[51]
-  nHB <- p[52]
-  nHC <- p[53]
-  aV <- p[54]
-  nVB <- p[55]
-  nVH <- p[56]
+  gammaF1 <- p[7]/30 #1/day
+  gammaF0 <- p[8]/30 #1/day
+  tgammaF <- p[9]*30 #1/day
+  gammaR <- p[10]/30 #1/day
+  leafgrow <- p[11]
+  leaffall <- p[12]
+  Tmin <- p[13]
+  Tmax <- p[14]
+  Topt <- p[15]
+  fCalpha700 <- p[16]
+  fCg700 <- p[17]
+  m0 <- p[18]
+  fN0 <- p[19]
+  fNn <- p[20]
+  MaxAge <- p[21]
+  nAge <- p[22]
+  rAge <- p[23]
+  gammaN1 <- p[24]
+  gammaN0 <- p[25]
+  tgammaN <- p[26]
+  ngammaN <- p[27]
+  wSx1000 <- p[28]
+  thinPower <- p[29]
+  mF <- p[30]
+  mR <- p[31]
+  mS <- p[32]
+  SLA0 <- p[33]
+  SLA1 <- p[34]
+  tSLA <- p[35]
+  k <- p[36]
+  fullCanAge <- p[37]
+  MaxIntcptn <- p[38]
+  LAImaxIntcptn <- p[39]
+  alphaCx <- p[40]
+  y <- p[41]
+  CoeffCond <- p[42] #defines stomatal response to VPD
+  MinCond <- p[43]
+  MaxCond <- p[44] #maximum stomatal conductance integrated over the canopy
+  BLcond <- p[45] #conductance between the canopy layer and the atmoshperic layer
+  LAIgcx <- p[46] #canopy LAI for maximum canopy conductance (stomata conductance)
+  fracBB0 <- p[47]
+  fracBB1 <- p[48]
+  tBB <- p[49]
+  rho0 <- p[50]
+  rho1 <- p[51]
+  tRho <- p[52]
+  aH <- p[53]
+  nHB <- p[54]
+  nHC <- p[55]
+  aV <- p[56]
+  nVB <- p[57]
+  nVH <- p[58]
   kF <- 1
   SnowmMeltFactor <- 2.5
   #Conversion factors
@@ -151,6 +152,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   EndAge <- EndAge
   StartDate <- as.Date(StartDate,"%d/%m/%Y")
   EndDate <- StartDate+(EndAge-StandAgei)*365
+  date <- StartDate
   Duration <- as.numeric(EndDate-StartDate)+1 
   WS <- WSi
   WF <- WFi
@@ -297,10 +299,17 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   if (tgammaF * gammaF1 == 0) {
     gammaF <- gammaF1 
   } else {
-    kgammaF <- 12 * log(1 + gammaF1 / gammaF0) / tgammaF
+    kgammaF <- 12 * 365 * log(1 + gammaF1 / gammaF0) / tgammaF #recheck!
     gammaF <- gammaF1 * gammaF0 / (gammaF0 + (gammaF1 - gammaF0) * exp(-kgammaF * StandAge))
   }
-  
+  #Leaf fall
+  if(leaffall>0){
+    currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
+    if(leafgrow > currentMonth | currentMonth >= leaffall){
+      WFprior <- WF
+      WF <- 0
+    }
+  }
   #Initialize stand data
   AvStemMass <- WS * 1000 / StemNo  
   avDBH <- (AvStemMass / aWs) ^ (1 / nWs) 
@@ -314,7 +323,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  date <- StartDate
   out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=22))
   colnames(out) <- c("Date","StandAge","StemNo","WF","WR","WS","avDBH","Height",
                      "StandVol","volWCer","volWCdr","NPP","LAI","Evapotranspiration","AvStemMass","BasArea","selfThin","WSext",
@@ -636,6 +644,16 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     WS <- WS + incrWS
     TotalW <- WF + WR + WS
     
+    #Leaf fall
+    if(leaffall>0){
+      currentDayMonth <- format(as.Date(date,format="%d/%m/%Y"),"%d-%m")
+      currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
+      if(currentDayMonth==paste0("01-",leaffall)) WFprior <- WF
+      if(currentMonth==leaffall) WF <- max(WF - WFprior/31,0) #decrease dynamically over the month: end of leaffall no leaves
+      if(currentMonth==leaffall+1) WF <- 0
+      if(currentMonth==leafgrow) WF <- min(WF + WFprior/31,WFprior) #grow dynamically over the whole month: end of leafgrow WFprior 
+    }
+    
     #Update tree and stand data at the end of this time period,
     #taking mortality, thinning or defoliation into account
     
@@ -680,7 +698,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       gammaN <- gammaN1
     } 
     if (gammaN > 0) {
-      delStems <- gammaN / 12 / 100 * StemNo 
+      delStems <- gammaN / 12 * 365 / 100 * StemNo 
       WF <- WF - mF * delStems * (WF / StemNo)
       WR <- WR - mR * delStems * (WR / StemNo)
       WSmort <- mS * delStems * (WS / StemNo)
@@ -753,7 +771,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     if (tgammaF * gammaF1 == 0) {
       gammaF <- gammaF1 
     } else {
-      kgammaF <- 12 * log(1 + gammaF1 / gammaF0) / tgammaF
+      kgammaF <- 12 * 365 * log(1 + gammaF1 / gammaF0) / tgammaF
       gammaF <- gammaF1 * gammaF0 / (gammaF0 + (gammaF1 - gammaF0) * exp(-kgammaF * StandAge))
     }
     
