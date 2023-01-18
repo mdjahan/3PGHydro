@@ -6,7 +6,7 @@ library(rpackage.3PGHydro)
 setwd("YOUR_DATA_PATH")
 
 #climate data
-climate <- read.csv2("climate.csv")
+climate <- read.csv("climate.csv")
 
 #load 3PG parameters
 Parameter_EU_Species <- read.csv("Parameter_EUSpecies.csv") #parameters from Forrester et al. 2021
