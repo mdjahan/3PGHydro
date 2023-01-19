@@ -5,4 +5,4 @@
 Further improvements besides described in Yousefpour and Djahangard (2021) are a dynamic leaf fall and leaf growth model for decidious trees as well as dynamic CO2-concentration function that prdouces yearly values for historical period as well as climate change scenarios RCP2.6 & RCP8.5. Moreover, 3PG-Hydro integrates the stand volume & height calculation method as described in Forrester et al. (2021) (DOI:10.1007/s10342-021-01370-3). Therefore, the parameters from Forrester et al. (2021) can be used.
 
 # Schema 3PG-Hydro (as in Yousefpour & Djahangard (2021)):
-![schema1](https://user-images.githubusercontent.com/122866605/213461478-b1b788f5-08ee-4dd5-bdfd-586d32ac30f8.png)
+![schema1](https://user-images.githubusercontent.com/122866605/213461877-833bb89d-31b6-4ca1-99d3-ef30e7fcff4f.png)
