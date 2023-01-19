@@ -9,9 +9,9 @@ setwd("YOUR_DATA_PATH")
 climate <- read.csv("climate.csv")
 
 #load 3PG parameters
-Parameter_EU_Species <- read.csv("Parameter_EUSpecies.csv") #parameters from Forrester et al. 2021
+Parameter <- read.csv("3PG_Parameter.csv") #parameters from Forrester et al. 2021
 #select species
-p <- Parameter_EU_Species$Quercus.petraea
+p <- Parameter$Quercus.petraea
 
 #Site & Stand characteristics
 lat <- 47.5
