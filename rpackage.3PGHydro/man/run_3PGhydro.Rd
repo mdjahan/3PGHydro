@@ -33,7 +33,7 @@ run_3PGhydro(
 \arguments{
 \item{climate}{Climate data as .csv file, mandatory column names ("date" ("dd/mm/yyyy"),"Tav","Tmax","Tmin","Rain","SolarRad")}
 
-\item{p}{3PG tree species parameter .csv file (more info...)}
+\item{p}{3PG tree species parameter .csv file}
 
 \item{lat}{site latitude UTM}
 
