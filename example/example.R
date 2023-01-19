@@ -14,7 +14,7 @@ Parameter_EU_Species <- read.csv("Parameter_EUSpecies.csv") #parameters from For
 p <- Parameter_EU_Species$Quercus.petraea
 
 #Site & Stand characteristics
-lat <- 40.5
+lat <- 47.5
 StartDate <- "01/01/1960"
 StandAgei <- 20
 EndAge <- 65
