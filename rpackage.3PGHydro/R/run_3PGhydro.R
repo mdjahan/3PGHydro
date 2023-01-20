@@ -115,6 +115,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   aV <- p[56]
   nVB <- p[57]
   nVH <- p[58]
+  gammaN0attack <- p[59]
+  attackAge <- p[60]
+  attackTime <- p[61] 
+  #
   kF <- 1
   SnowmMeltFactor <- 2.5
   #Conversion factors
@@ -158,6 +162,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   StartDate <- as.Date(StartDate,"%d/%m/%Y")
   EndDate <- StartDate+(EndAge-StandAgei)*365
   date <- StartDate
+  currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
   Duration <- as.numeric(EndDate-StartDate)+1 
   WS <- WSi
   WF <- WFi
@@ -328,9 +333,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=22))
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=21))
   colnames(out) <- c("Date","StandAge","StemNo","WF","WR","WS","avDBH","Height",
-                     "StandVol","volWCer","volWCdr","NPP","LAI","Evapotranspiration","AvStemMass","BasArea","selfThin","WSext",
+                     "StandVol","volWCer","volWCdr","NPP","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
                      "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff")
   out[1,1] <- as.character(date)
   out[1,2:11] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
@@ -663,9 +668,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     TotalW <- WF + WR + WS
     
     #Leaf fall
+    MonthOneDayBefore <- currentMonth #needed for end of month calculations
+    currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
     if(leaffall>0){
       currentDayMonth <- format(as.Date(date,format="%d/%m/%Y"),"%d-%m")
-      currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
       if(currentDayMonth==paste0("01-",leaffall)) WFprior <- WF
       if(currentMonth==leaffall) WF <- max(WF - WFprior/31,0) #decrease dynamically over the month: end of leaffall no leaves
       if(currentMonth==leaffall+1) WF <- 0
@@ -679,79 +685,85 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     lengthYear <- as.numeric(strftime(as.Date(paste0("31-12-",year),"%d-%m-%Y"),format = "%j"))
     StandAge <- StandAge + 1/lengthYear
     
-    #Thinning & Mortalities
-    #Perform any thinning events
-    nThin <- as.numeric(length(thinAges))
-    WSext <- 0
-    if (thinEventNo <= nThin)  {
-      if (StandAge >= thinAges[thinEventNo]) {
-        if (StemNo > thinVals[thinEventNo]) { 
-          delN <- (StemNo - thinVals[thinEventNo]) / StemNo
-          StemNo <- StemNo * (1 - delN)
-          WF <- WF * (1 - delN * thinWF[thinEventNo])
-          WR <- WR * (1 - delN * thinWR[thinEventNo])
-          WSext <- WS * delN * thinWS[thinEventNo]
-          WS <- WS * (1 - delN * thinWS[thinEventNo])
-          #Caculate extracted StandVolume
-          #if (thinEventNo <= 1) {
-          #StandVol_ext <- StandVol_ext + aV * avDBH ^ nVB * (StemNoi - thinVals[thinEventNo]) ^ nVH 
-          #StandVol_ext_single <- aV * avDBH ^ nVB * (StemNoi - thinVals[thinEventNo]) ^ nVH
-          #} else {
-          #StandVol_ext <- StandVol_ext + aV * avDBH ^ nVB * (thinVals[thinEventNo-1] - thinVals[thinEventNo]) ^ nVH 
-          #StandVol_ex <- aV * avDBH ^ nVB * (thinVals[thinEventNo-1] - thinVals[thinEventNo]) ^ nVH
-          #}
-        }
-        thinEventNo <- thinEventNo + 1
-      }
-    }
     
-    #Calculate age and stress-related mortality
-    delStems <- 0
-    mortality <- 0
-    WSMort <- 0
-    if (tgammaN != 0) {
-      gammaN <- gammaN1 + (gammaN0 - gammaN1)*exp(-log(2)*(StandAge/tgammaN)^ngammaN)
-    } else {
-      gammaN <- gammaN1
-    } 
-    if (gammaN > 0) {
-      delStems <- gammaN * StemNo / 12 / 100 
-      WF <- WF - mF * delStems * (WF / StemNo)
-      WR <- WR - mR * delStems * (WR / StemNo)
-      WSmort <- mS * delStems * (WS / StemNo)
-      WS <- WS - mS * delStems * (WS / StemNo)
-      StemNo <- StemNo - delStems
-      mortality <- mortality + delStems
-    }
-    
-    #Calculate self-thinning mortality
-    selfThin <- 0
-    WSselfThin <- 0
-    wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower #(1000 / StemNo) ^ thinPower can be seen as a factor/ empirical relationship determining how soon selfthinnning starts
-    AvStemMass <- WS * 1000 / StemNo #transform Ws into kg/tree
-    delStems <- 0
-    if (wSmax < AvStemMass) {
-      accuracy <- 1 / 1000
-      n <- StemNo / 1000
-      x1 <- 1000 * mS * WS / StemNo
-      for (i in 1:5){
-        x2 <- wSx1000 * n ^ (1-thinPower)  
-        fN <- x2 - x1 * n - (1 - mS) * WS
-        dfN <- (1 - thinPower) * x2 / n - x1
-        dN <- -fN / dfN
-        n <- n + dN
-        if (abs(dN)<=accuracy) break
+    #Bark beetle attack, Thinning & Mortality: At the end of each month
+    if(MonthOneDayBefore!=currentMonth){
+      #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
+      if(StandAge >= attackAge & attackAge > 0){
+        gammaNattack <- gammaN0attack * exp(-((StandAge - attackAge) * 12)/attackTime)
+        delStems = gammaNattack * StemNo / 100
+        WF = WF - mF * delStems * (WF / StemNo)
+        WR = WR - mR * delStems * (WR / StemNo)
+        WS = WS - mS * delStems * (WS / StemNo)
+        StemNo = StemNo - delStems
+        mortality = mortality + delStems
       }
-      delStems <- StemNo - 1000 * n
       
-      WF <- WF - mF * delStems * (WF / StemNo)
-      WR <- WR - mR * delStems * (WR / StemNo)
-      WSselfThin <- mS * delStems * (WS / StemNo)
-      WS <- WS - mS * delStems * (WS / StemNo)
-      StemNo <- StemNo - delStems
-      wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower
-      AvStemMass <- WS * 1000 / StemNo
-      selfThin <- selfThin + delStems
+      #Perform any thinning events
+      nThin <- as.numeric(length(thinAges))
+      WSext <- 0
+      if (thinEventNo <= nThin)  {
+        if (StandAge >= thinAges[thinEventNo]) {
+          if (StemNo > thinVals[thinEventNo]) { 
+            delN <- (StemNo - thinVals[thinEventNo]) / StemNo
+            StemNo <- StemNo * (1 - delN)
+            WF <- WF * (1 - delN * thinWF[thinEventNo])
+            WR <- WR * (1 - delN * thinWR[thinEventNo])
+            WSext <- WS * delN * thinWS[thinEventNo]
+            WS <- WS * (1 - delN * thinWS[thinEventNo])
+          }
+          thinEventNo <- thinEventNo + 1
+        }
+      }
+      
+      #Calculate age and stress-related mortality
+      delStems <- 0
+      mortality <- 0
+      WSMort <- 0
+      if (tgammaN != 0) {
+        gammaN <- gammaN1 + (gammaN0 - gammaN1)*exp(-log(2)*(StandAge/tgammaN)^ngammaN)
+      } else {
+        gammaN <- gammaN1
+      } 
+      if (gammaN > 0) {
+        delStems <- gammaN * StemNo / 12 / 100
+        WF <- WF - mF * delStems * (WF / StemNo)
+        WR <- WR - mR * delStems * (WR / StemNo)
+        WSmort <- mS * delStems * (WS / StemNo)
+        WS <- WS - mS * delStems * (WS / StemNo)
+        StemNo <- StemNo - delStems
+        mortality <- mortality + delStems
+      }
+      
+      #Calculate self-thinning mortality
+      selfThin <- 0
+      WSselfThin <- 0
+      wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower #(1000 / StemNo) ^ thinPower can be seen as a factor/ empirical relationship determining how soon selfthinnning starts
+      AvStemMass <- WS * 1000 / StemNo #transform Ws into kg/tree
+      delStems <- 0
+      if (wSmax < AvStemMass) {
+        accuracy <- 1 / 1000
+        n <- StemNo / 1000
+        x1 <- 1000 * mS * WS / StemNo
+        for (i in 1:5){
+          x2 <- wSx1000 * n ^ (1-thinPower)  
+          fN <- x2 - x1 * n - (1 - mS) * WS
+          dfN <- (1 - thinPower) * x2 / n - x1
+          dN <- -fN / dfN
+          n <- n + dN
+          if (abs(dN)<=accuracy) break
+        }
+        delStems <- StemNo - 1000 * n
+        
+        WF <- WF - mF * delStems * (WF / StemNo)
+        WR <- WR - mR * delStems * (WR / StemNo)
+        WSselfThin <- mS * delStems * (WS / StemNo)
+        WS <- WS - mS * delStems * (WS / StemNo)
+        StemNo <- StemNo - delStems
+        wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower
+        AvStemMass <- WS * 1000 / StemNo
+        selfThin <- selfThin + delStems
+      }
     }
     
     ##################################################################
@@ -809,8 +821,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:22] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,LAI,EvapTransp,
-                                  AvStemMass,BasArea,selfThin,WSext,StandVol_loss, VolProduction_tot,DP,RunOff))
+    out[day,2:21] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,LAI,EvapTransp,
+                                  AvStemMass,BasArea,WSext,StandVol_loss, VolProduction_tot,DP,RunOff))
   }
   
   ###########################################################
