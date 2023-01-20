@@ -1,0 +1,62 @@
+Parameter,Unit,Explanation
+pFS2,-,Foliage:stem partitioning ratio @ D=2 cm
+pFS20,-,Foliage:stem partitioning ratio @ D=20 cm
+aWs,-,Constant in the stem mass v. diam. relationship
+nWS,-,Power in the stem mass v. diam. relationship
+pRx,-,Maximum fraction of NPP to roots
+pRn,-,Minimum fraction of NPP to roots
+gammaF1,1/month,Maximum litterfall rate
+gammaF0,1/month,Litterfall rate at t = 0
+tgammaF,months,Age at which litterfall rate has median value
+gammaR,1/month,Average monthly root turnover rate
+leafgrow,month,Month when leafgrow starts
+leaffall,month,Month when leaffall starts
+Tmin,deg. C,Minimum temperature for growth
+Tmax,deg. C,Maximum temperature for growth
+Topt,deg. C,Optimum temperature for growth
+fCalpha700,-,Assimialtion enhancement factor at 700 ppm
+fCg700,-,Canopy conductance enhancement factor at 700 ppm
+m0,-,Value of 'm' when FertilityRating = 0
+fN0,-,Value of 'fNutr' when FertilityRating = 0
+fNn,-,Power of (1-FR) in 'fNutr' 
+MaxAge,years,Maximum stand age used in age modifier
+rAge,-,Power of relative age in function for fAge
+nAge,-,Relative age to give fAge = 0.5
+gammaN1,%/year,Mortality rate for old age (when t = 2 * tgammaN)
+gammaN0,%/year,Seedling mortality rate (t = 0)
+tgammaN,years,Age at which mortality rate has median value
+ngammaN,-,Shape of mortality response
+wSx1000,-,Max. stem mass per tree @ 1000 trees/hectare
+thinPower,-,Power in self-thinning rule
+mF,-,Fraction mean single-tree foliage biomass lost per dead tree
+mR,-,Fraction mean single-tree root biomass lost per dead tree
+mS,-,Fraction mean single-tree stem biomass lost per dead tree
+SLA0,m2/kg,Specific leaf area at age 0
+SLA1,m2/kg,Specific leaf area for mature leaves
+tSLA,years,Age at which specific leaf area = (SLA0+SLA1)/2
+k,-,Extinction coefficient for absorption of PAR by canopy
+fullCanAge,years,Age at canopy cover 
+MaxIntcptn,-,Maximum proportion of rainfall evaporated from canopy
+LAImaxIntcptn,m2/m2,LAI for maximum rainfall interception
+alphaCx,molC/molPAR,Canopy quantum efficiency
+y,-,Ratio NPP/GPP
+CoeffCond,1/mBar,Defines stomatal response to VPD
+MinCond,m/s,Minimum canopy conductance
+MaxCond,m/s,Maximum canopy conductance
+BLCond,m/s,Canopy boundary layer conductance
+LAIgcx,m2/m2,LAI for maximum canopy conductance
+fracBB0,-,Branch and bark fraction at age 0
+fracBB1,-,Branch and bark fraction for mature stands
+tBB,years,Age at which fracBB = (fracBB0+fracBB1)/2
+rho0,t/m3,Minimum basic density - for young trees
+rho1,t/m3,Maximum basic density - for older trees
+tRho,years,Age at which rho = (rhoMin+rhoMax)/2
+aH,-,Constant in the stem height relationship
+nHB,-,Power of DBH in the stem height relationship
+nHC,-,Power of stocking in the stem height relationship
+aV,-,Constant in the stem volume relationship
+nVB,-,Power of DBH in the stem volume relationship
+nVH,-,Power of stocking in the stem volume relationship
+gammaN0attack,%/month,Initial mortality rate of bark beetle
+attackAge,years,Age at which bar beetles attack
+attackTime,months,Time constant fur induced mortality of bark beetle attack 
