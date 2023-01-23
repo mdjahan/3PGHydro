@@ -57,6 +57,6 @@ nHC,-,Power of stocking in the stem height relationship
 aV,-,Constant in the stem volume relationship
 nVB,-,Power of DBH in the stem volume relationship
 nVH,-,Power of stocking in the stem volume relationship
-gammaN0attack,%/month,Initial mortality rate of bark beetle
-attackAge,years,Age at which bar beetles attack
-attackTime,months,Time constant fur induced mortality of bark beetle attack 
+gammaN0attack,%/month,Initial mortality rate due to bark beetle
+attackAge,years,Age at which bark beetles attack
+attackTime,months,Time constant for induced mortality of bark beetle attack 
