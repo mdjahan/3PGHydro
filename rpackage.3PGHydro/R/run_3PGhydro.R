@@ -135,7 +135,11 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   #Parameter for Soil Evaporation
   maxgSoil <- 0.001 #maximum soil conductance
   gAS <- 0.015 #Soil aerodynamic conductance
-  #
+  #For NEE calculation (from Meyer et al. (2018)
+  Rh10soil <- 0.0003 #base-respiration rate at 10 degrees (tonsDM/tonC/d); range: 0.0001 - 0.0005
+  Q10 <- 2 #Q10 for heterotrophic respiration
+  Csoil <- 45 #soil carbon content (tons/ha)
+  #  
   poolFractn <- 0
   
   #CO2 Equations: fitted with values from IIASA
@@ -333,9 +337,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=21))
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=22))
   colnames(out) <- c("Date","StandAge","StemNo","WF","WR","WS","avDBH","Height",
-                     "StandVol","volWCer","volWCdr","NPP","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
+                     "StandVol","volWCer","volWCdr","NPP","NEE","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
                      "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff")
   out[1,1] <- as.character(date)
   out[1,2:11] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
@@ -642,6 +646,13 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     NPP <- TranspScaleFactor * NPP
     if(EvapTransp>0) WUE <- 100 * NPP / EvapTransp
     
+    #Calculation of Net Ecosystem Production & Net Ecosystem Exchange (Meyer et al. 2018)
+    #Temperature
+    Rhsoil <- Rh10soil * Csoil * Q10 ^ (((0.0251 * Tav ^ 2 + 0.4079 * Tav + 1.0482) - 10) / 10)
+    #  
+    NEP <- NPP - Rhsoil #calculation of NEP (T DM/ha) 
+    NEE <- -NEP                     
+    
     ###############################################################################
     #Determine biomass increments and losses
     #calculate partitioning coefficients
@@ -699,7 +710,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         mortality = mortality + delStems
       }
       
-      #Perform any thinning events
+      #Perform any thinning events: performed at the beginning of the year
       nThin <- as.numeric(length(thinAges))
       WSext <- 0
       if (thinEventNo <= nThin)  {
@@ -821,7 +832,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:21] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,LAI,EvapTransp,
+    out[day,2:22] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,NEE,LAI,EvapTransp,
                                   AvStemMass,BasArea,WSext,StandVol_loss, VolProduction_tot,DP,RunOff))
   }
   
