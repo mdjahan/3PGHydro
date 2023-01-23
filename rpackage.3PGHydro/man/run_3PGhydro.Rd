@@ -51,7 +51,7 @@ run_3PGhydro(
 
 \item{StemNoi}{initial stem number}
 
-\item{CO2Concentration}{select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP8.5"}
+\item{CO2Concentration}{select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"}
 
 \item{FR}{fertility rating of site (0-1)}
 
@@ -78,7 +78,7 @@ run_3PGhydro(
 \item{thinWS}{thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL}
 }
 \value{
-output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off
+output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off
 }
 \description{
 3PG-Hydro is an update of the original 3PG Forest Growth model by Landsberg and Waring (1997) (DOI:10.1016/S0378-1127(97)00026-1). 3PG-Hydro calculates on a daily timestep, includes a soil-water-model as well as a snow routine. Further information in the publication on 3PG-Hydro by Yousefpour and Djahangard (2021) (DOI:10.3390/f12121729). 3PG-Hydro is available as an R-package, coding done by Anja Nölte & Marc Djahangard.

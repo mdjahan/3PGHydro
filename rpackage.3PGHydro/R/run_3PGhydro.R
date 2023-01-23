@@ -11,7 +11,7 @@
 #' @param WRi inital weight of roots in tons
 #' @param WSi inital weight of stems in tons
 #' @param StemNoi initial stem number
-#' @param CO2Concentration select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP8.5"
+#' @param CO2Concentration select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"
 #' @param FR fertility rating of site (0-1)
 #' @param SVEquation choose the equation used for stand volume calculation (1-3) (1: V = aV * H^VH * D^VB, Forrester et al. (2021), 2: 3PG original function with stem mass & density, 3: simple volume calculation V = FormFactor * CylinderVolume)
 #' @param SoilClass soil classes, type number 1 - 4 (1: sand, 2: sandy loam, 3: clay loam, 4: clay)
@@ -24,7 +24,7 @@
 #' @param thinWF thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWR thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWS thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
-#' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
+#' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
 #'p <- read.csv("3PG_Parameter.csv") 
@@ -136,9 +136,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   maxgSoil <- 0.001 #maximum soil conductance
   gAS <- 0.015 #Soil aerodynamic conductance
   #For NEE calculation (from Meyer et al. (2018)
-  Rh10soil <- 0.0003 #base-respiration rate at 10 degrees (tonsDM/tonC/d); range: 0.0001 - 0.0005
+  Rh10soil <- 0.00025 #base-respiration rate at 10 degrees (tonsDM/tonC/d); range: 0.0001 - 0.0005
   Q10 <- 2 #Q10 for heterotrophic respiration
-  Csoil <- 45 #soil carbon content (tons/ha)
+  Csoil <- 40 #soil carbon content (tons/ha)
   #  
   poolFractn <- 0
   
@@ -149,6 +149,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   }
   CO2rcp26Eq <- function(year) {
     CO2 <- -0.014632*year^2+60.2673*year+61617
+    return(CO2)
+  }
+  CO2rcp45Eq <- function(year) {
+    CO2 <- -0.0200214*year^2+84.1081*year-87793.8
     return(CO2)
   }
   CO2rcp85Eq <- function(year) {
@@ -423,6 +427,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #CO2 added as functions for historical, RCP2.6, RCP8.5 (for now)
     if(CO2Concentration == "Historical") {CO2 <- CO2HistEq(year)}
     if(CO2Concentration == "RCP2.6") {CO2 <- CO2rcp26Eq(year)}
+    if(CO2Concentration == "RCP4.5") {CO2 <- CO2rcp45Eq(year)}
     if(CO2Concentration == "RCP8.5") {CO2 <- CO2rcp85Eq(year)}
     fCalpha <- fCalphax * CO2 / (350 * (fCalphax - 1) + CO2)
     fCg <- fCg0 / (1 + (fCg0 - 1) * CO2 / 350)
