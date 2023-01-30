@@ -17,6 +17,7 @@ run_3PGhydro(
   StemNoi,
   CO2Concentration,
   FR,
+  HeightEquation,
   SVEquation,
   SoilClass,
   EffectiveRootZoneDepth,
@@ -54,6 +55,8 @@ run_3PGhydro(
 \item{CO2Concentration}{select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"}
 
 \item{FR}{fertility rating of site (0-1)}
+
+\item{HeightEquation}{choose the height equation (1-2), (1: 3PG Original Equation, 2: Michajlow-Schumacher from Forrester et al. (2021))}
 
 \item{SVEquation}{choose the equation used for stand volume calculation (1-3) (1: V = aV * H^VH * D^VB, Forrester et al. (2021), 2: 3PG original function with stem mass & density, 3: simple volume calculation V = FormFactor * CylinderVolume)}
 
@@ -97,6 +100,7 @@ WFi <- 10
 WRi <- 20
 CO2Concentration <- "Historical"
 FR <- 0.7
+HeightEquation <- 1
 SVEquation <- 2
 SoilClass <- 2
 EffectiveRootZoneDepth <- 1

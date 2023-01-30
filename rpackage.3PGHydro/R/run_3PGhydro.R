@@ -13,6 +13,7 @@
 #' @param StemNoi initial stem number
 #' @param CO2Concentration select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"
 #' @param FR fertility rating of site (0-1)
+#' @param HeightEquation choose the height equation (1-2), (1: 3PG Original Equation, 2: Michajlow-Schumacher from Forrester et al. (2021))
 #' @param SVEquation choose the equation used for stand volume calculation (1-3) (1: V = aV * H^VH * D^VB, Forrester et al. (2021), 2: 3PG original function with stem mass & density, 3: simple volume calculation V = FormFactor * CylinderVolume)
 #' @param SoilClass soil classes, type number 1 - 4 (1: sand, 2: sandy loam, 3: clay loam, 4: clay)
 #' @param EffectiveRootZoneDepth depth of effective root zone in meter
@@ -39,6 +40,7 @@
 #' WRi <- 20
 #' CO2Concentration <- "Historical"
 #' FR <- 0.7
+#' HeightEquation <- 1
 #' SVEquation <- 2
 #' SoilClass <- 2
 #' EffectiveRootZoneDepth <- 1
@@ -52,7 +54,7 @@
 #' thinWS <- rep(0.8,length(thinAges))  
 #' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
 #' @export
-run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS){
+run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS){
   
   ############################################################
   #parameters
@@ -165,13 +167,13 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   ####################################################
   
   #Assign initial state of stand
-  StandAge<-StandAgei
+  StandAge <-StandAgei
   EndAge <- EndAge
   StartDate <- as.Date(StartDate,"%d/%m/%Y")
-  EndDate <- StartDate+(EndAge-StandAgei)*365
+  EndDate <-   seq(StartDate, length=(EndAge-StandAgei)+1, by="years")[(EndAge-StandAgei)+1]
   date <- StartDate
   currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
-  Duration <- as.numeric(EndDate-StartDate)+1 
+  Duration <- as.numeric(EndDate-StartDate) 
   WS <- WSi
   WF <- WFi
   WR <- WRi
@@ -332,7 +334,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   AvStemMass <- WS * 1000 / StemNo  
   avDBH <- (AvStemMass / aWs) ^ (1 / nWs) 
   BasArea <- (((avDBH / 200) ^ 2) * round(pi,9)) * StemNo #Correct for rounding difference of pi
-  Height <- 1.3 + aH * exp(-nHB/avDBH) + nHC * Density * avDBH #Changed to Michajlow-Schumacher (Forrester et. al, 2021)
+  if(HeightEquation==1) Height <-  aH * avDBH ^ nHB * StemNo ^ nHC
+  if(HeightEquation==2) Height <- 1.3 + aH * exp(-nHB/avDBH) + nHC * Density * avDBH #Michajlow-Schumacher (Forrester et. al, 2021)
   LAI <- 0.1*SLA*WF
   #Stand volume m3/ha (excluding branch and bark fraction, see. sands 2002 p.5)
   if(SVEquation==1) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
@@ -348,8 +351,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   out[1,1] <- as.character(date)
   out[1,2:11] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
   
-  #Starting Date of the climate data+
-  climate$date <- as.Date(climate$date,format="%d/%m/%Y")
+  #Starting Date of the climate data
   selectClimate <- as.numeric(which(date==climate[,1]))
   climate <- climate[selectClimate:length(climate[,1]),]
   
@@ -817,9 +819,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     LAI <- WF * SLA * 0.1
     avDBH <- (AvStemMass / aWs) ^ (1 / nWs) 
     BasArea <- ((avDBH / 200) ^ 2) * pi * StemNo
-    Height <- 1.3 + aH * exp(-nHB/avDBH) + nHC * Density * avDBH #Changed to Michajlow-Schumacher (Forrester et. al, 2021)
-    
-    #Stand volume m3/ha (excluding branch and bark fraction, see. sands 2002 p.5)
+    if(HeightEquation==1) Height <-  aH * avDBH ^ nHB * StemNo ^ nHC
+    if(HeightEquation==2) Height <- 1.3 + aH * exp(-nHB/avDBH) + nHC * Density * avDBH #Michajlow-Schumacher (Forrester et. al, 2021)
     StandVol_loss <- 0
     if(SVEquation==1) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
     if(SVEquation==2) StandVol <- WS * (1 - fracBB) / Density #3PG original equation
