@@ -24,6 +24,7 @@ WFi <- 10
 WRi <- 20
 CO2Concentration <- "Historical"
 FR <- 0.5
+HeightEquation <- 2 
 SVEquation <- 1 #1 is with parameters and form SV = a * H^b * D^c (Forrester et al. 2021), 2: with WS & density, 3: backup --> simple with form factor 0.7
 #Soil
 SoilClass <- 2
