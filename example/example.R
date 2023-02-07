@@ -7,6 +7,7 @@ setwd("YOUR_DATA_PATH")
 
 #climate data
 climate <- read.csv("climate.csv")
+climate$date <- as.Date(climate$date,"%d/%m/%Y")
 
 #load 3PG parameters
 Parameter <- read.csv("3PG_Parameter.csv") #parameters from Forrester et al. 2021
