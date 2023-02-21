@@ -1,7 +1,7 @@
 #' Run 3PG-Hydro
 #'
 #' 3PG-Hydro is an update of the original 3PG Forest Growth model by Landsberg and Waring (1997) (DOI:10.1016/S0378-1127(97)00026-1). 3PG-Hydro calculates on a daily timestep, includes a soil-water-model as well as a snow routine. Further information in the publication on 3PG-Hydro by Yousefpour and Djahangard (2021) (DOI:10.3390/f12121729). 3PG-Hydro is available as an R-package, coding done by Anja Nölte & Marc Djahangard.
-#' @param climate Climate data as .csv file, mandatory column names ("date" ("dd/mm/yyyy"),"Tav","Tmax","Tmin","Rain","SolarRad")
+#' @param climate Climate data as .csv file, mandatory column names ("date" ("dd/mm/yyyy"),"Tmax","Tmin","Rain","SolarRad")
 #' @param p 3PG tree species parameter .csv file
 #' @param lat site latitude UTM
 #' @param StartDate starting date, format: "dd/mm/yyyy"
@@ -25,6 +25,7 @@
 #' @param thinWF thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWR thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWS thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
+#' @param phenology choose the phenology model (0/1): 0 = constant leaf phenology, 1 = dynamic leaf phenology from Noelte et al. 2020
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
@@ -52,9 +53,13 @@
 #' thinWF <- rep(0.8,length(thinAges)) 
 #' thinWR <- rep(0.8,length(thinAges)) 
 #' thinWS <- rep(0.8,length(thinAges))  
-#' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
+#' phenology <- 0
+#' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,phenology)
 #' @export
-run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS){
+run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,
+                         CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,
+                         EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,
+                         thinAges,thinVals,thinWF,thinWR,thinWS,phenology){
   
   ############################################################
   #parameters
@@ -120,6 +125,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   gammaN0attack <- p[59]
   attackAge <- p[60]
   attackTime <- p[61] 
+  leafout_i <- p[62]
+  leafout_s <- p[63]
+  leafout_p <- p[64]
+  leaffall_i <- p[65]
+  leaffall_s <- p[66]
+  leaffall_p <- p[67]
   #
   kF <- 1
   SnowmMeltFactor <- 2.5
@@ -185,6 +196,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   WSselfThin <- 0
   WSMort <- 0
   accV <- 0
+  WFstore <- 0
   #StandVol_ext_single <- 0
   
   #Assign Soil Parameters and 3PG original SWconstant and SWpower as function of Soil Class
@@ -321,15 +333,71 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     kgammaF <- 12 * log(1 + gammaF1 / gammaF0) / tgammaF #recheck!
     gammaF <- gammaF1 * gammaF0 / (gammaF0 + (gammaF1 - gammaF0) * exp(-kgammaF * StandAge))
   }
-  #Leaf fall
-  if(leaffall>0){
-    currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
-    if(leafgrow > currentMonth | currentMonth >= leaffall){
-      WFprior <- WF
-      WF <- 0
+  
+  # If simulation start is during the dormant season, make adjustments
+  if(phenology == 0){
+    if(leaffall>0){
+      currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
+      if(leafgrow > currentMonth | currentMonth >= leaffall){
+        WFprior <- WF
+        WF <- 0
+      }
     }
   }
   
+  if(phenology == 1){
+    currentYear <- as.numeric(substr(date,1,4))
+    # select rows for calculating mean spring and autumn temperatures
+    spring_rows <- which(substr(climate$date,1,7) %in% paste(currentYear,c('03','04','05'),sep = '-'))
+    aut_rows <- which(substr(climate$date,1,7) %in% paste(currentYear,'10',sep = '-'))
+    
+    # Calculate leaf unfolding day after coef from regression analysis between mean of monthly average temp 
+    # of march, april, may (DWD data) and day of leaf out (pep data).
+    DOY_LU = round(leafout_i - leafout_s * mean((climate$Tmax[spring_rows]+climate$Tmin[spring_rows])/2),0)
+    # Assume 20 days for WF recovery (Bequet et al. 2011, Barabroux et al. 2002)
+    # Convert DOY to date
+    leafgrow_period <- as.Date(seq(DOY_LU,DOY_LU+leafout_p,1), origin = paste(currentYear-1,"-12-31",sep=""))
+    
+    # Calcualte leaf senescence day after Delpierre et al. 2009 
+    # (LS90 = date (DoY) at which 90% of of 36 trees have colored or fallen >25% of their leaves)
+    DOY_LS = round(leaffall_s * mean((climate$Tmax[aut_rows]+climate$Tmin[aut_rows])/2) + leaffall_i, 0)
+    # Assume leaffall period of 50 days prior to the day of leaffall
+    # Convert DOY to date
+    leaffall_period <- as.Date(seq(DOY_LS-leaffall_p,DOY_LS,1), origin = paste(currentYear-1,"-12-31",sep=""))
+    
+    # Define the active season from leaf unfolding day to leaf senescence day
+    active_season <- as.Date(seq(DOY_LU,DOY_LS,1), origin = paste(currentYear-1,"-12-31",sep=""))
+    # During the dormant season WFstore is full (WFi), WF = 0
+    if(!date %in% active_season){
+      WFstore <- WF
+      WF <- 0
+    }
+    # During the leaf grow period: 
+      # WFstore is transferred to WFstore_active, where WFstore_active defines the maximum WF at the end of the leafgrow period
+      # WFstore ~ to the fraction of the active season in function of WFi
+      # WF ~ to the fraction of the growing season in function of WFi
+    if(date %in% active_season & date %in% leafgrow_period){
+      WFstore_active <- WF 
+      WFstore <- WF * which(active_season == date)/length(active_season)
+      WF <- WF * which(leafgrow_period == date)/leafout_p 
+    }
+    # During the active season after leaf grow completion and before start of leaffall: 
+      # WF = WFi 
+      # WFstore ~ to the fraction of the active season in function of WFi 
+    if(date %in% active_season & !date %in% leafgrow_period  & !date %in% leaffall_period){
+      WFstore <- WF * which(active_season == date)/length(active_season)
+    }
+    # During the leaffall period: 
+      # WFstore ~ to the fraction of the active season in function of WFi
+      # WF - the fraction of the leaffal period in function of WFi 
+    if(date %in% active_season & date %in% leaffall_period){
+      leaffall_rate <- WF/leaffall_p
+      WFstore <- WF * which(active_season == date)/length(active_season)
+      WF <-  WF * (1 - which(leaffall_period == date)/leaffall_p)
+    }
+  }
+
+
   #Initialize stand data
   AvStemMass <- WS * 1000 / StemNo  
   avDBH <- (AvStemMass / aWs) ^ (1 / nWs) 
@@ -344,10 +412,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=22))
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=23))
   colnames(out) <- c("Date","StandAge","StemNo","WF","WR","WS","avDBH","Height",
                      "StandVol","volWCer","volWCdr","NPP","NEE","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
-                     "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff")
+                     "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff","WFstore")
   out[1,1] <- as.character(date)
   out[1,2:11] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
   
@@ -370,7 +438,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     SolarRad <- climate$SolarRad[day]
     
     #Temperature data 
-    Tav <- climate$Tav[day]
+    Tav <- (climate$Tmax[day] + climate$Tmin[day])/2
     
     #VPD - mean day-time VPD (vapour pressure deficit)
     #gets daily "mean" VPD in mBar - based on daily max and min temperatures only
@@ -441,6 +509,31 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     
     #Physiological Modifier (PhysMod)
     PhysMod <- min(fVPD, fSW) * fAge 
+    
+    #Phenology
+    if(phenology == 1){
+      YearOneYearBefore <- currentYear #saves computation time to only compute leafgrow and leaffall period once a year
+      currentYear <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%Y"))
+      if(YearOneYearBefore != currentYear){
+        # select rows for calculating mean spring and autumn temperatures
+        spring_rows <- which(substr(climate$date,1,7) %in% paste(currentYear,c('03','04','05'),sep = '-'))
+        aut_rows <- which(substr(climate$date,1,7) %in% paste(currentYear,'10',sep = '-'))
+        
+        # Calculate leaf unfolding day after coef from regression analysis between mean of monthly average temp 
+        # of march, april, may (DWD data) and day of leaf out (pep data).
+        DOY_LU = round(leafout_i - leafout_s * mean((climate$Tmax[spring_rows]+climate$Tmin[spring_rows])/2),0)
+        # Assume 20 days for WF recovery (Bequet et al. 2011, Barabroux et al. 2002)
+        # Convert DOY to date
+        leafgrow_period <- as.Date(seq(DOY_LU,DOY_LU+leafout_p,1), origin = paste(currentYear-1,"-12-31",sep=""))
+        
+        # Calcualte leaf senescence day after Delpierre et al. 2009 
+        # (LS90 = date (DoY) at which 90% of of 36 trees have colored or fallen >25% of their leaves)
+        DOY_LS = round(leaffall_s * mean((climate$Tmax[aut_rows]+climate$Tmin[aut_rows])/2) + leaffall_i, 0)
+        # Assume leaffall period of 50 days prior to the day of leaffall
+        # Convert DOY to date
+        leaffall_period <- as.Date(seq(DOY_LS-leaffall_p,DOY_LS,1), origin = paste(currentYear-1,"-12-31",sep=""))
+      }
+    }
     
     #Determine gross and net biomass production
     
@@ -674,27 +767,61 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     incrWR <- NPP * pR
     incrWS <- NPP * pS
     #incrWF + incrWR + incrWS == NPP
-    
+
     #calculate litterfall & root turnover -
     lossWF <- gammaF/30 * WF
     lossWR <- gammaR/30 * WR
     
     #Calculate end-of-month biomass
-    WF <- WF + incrWF - lossWF
+    if(phenology == 0) WF <- WF + incrWF - lossWF
+    #With the dynamic phenology model all leaf biomass increments are stored for the next spring,
+      #this way the previous years determines WF of the current season
+    #Additionally it assumes no additional leaffall during the growing season, leading to a constant WF throughout one growing season 
+      #from the end of the leafgrow period until the beginning of the leaffall period
+    if(phenology == 1) WFstore <- WFstore + incrWF
     WR <- WR + incrWR - lossWR
     WS <- WS + incrWS
     TotalW <- WF + WR + WS
     
-    #Leaf fall
+    #Leaf fall and leaf grow
     MonthOneDayBefore <- currentMonth #needed for end of month calculations
     currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
-    if(leaffall>0){
-      currentDayMonth <- format(as.Date(date,format="%d/%m/%Y"),"%d-%m")
-      if(currentDayMonth==paste0("01-",leaffall)) WFprior <- WF
-      if(currentMonth==leaffall) WF <- max(WF - WFprior/31,0) #decrease dynamically over the month: end of leaffall no leaves
-      if(currentMonth==leaffall+1) WF <- 0
-      if(currentMonth==leafgrow) WF <- min(WF + WFprior/31,WFprior) #grow dynamically over the whole month: end of leafgrow WFprior 
+    if(phenology == 0){
+      if(leaffall>0){
+        currentDayMonth <- format(as.Date(date,format="%d/%m/%Y"),"%d-%m")
+        if(currentDayMonth==paste0("01-",leaffall)) WFprior <- WF
+        if(currentMonth==leaffall) WF <- max(WF - WFprior/31,0) #decrease dynamically over the month: end of leaffall no leaves
+        if(currentMonth==leaffall+1) WF <- 0
+        if(currentMonth==leafgrow) WF <- min(WF + WFprior/31,WFprior) #grow dynamically over the whole month: end of leafgrow WFprior 
+      }
     }
+    
+    if(phenology == 1){
+      # Leafgrow
+      # On the first day of the leafgrow period:
+        # Create an active WFstore for leafgrow period and set WFstore to zero so it can accumulate new NPP
+      if(date == leafgrow_period[1]){
+        WFstore_active <- WFstore
+        WFstore <- 0
+      }
+      # Grow linearly over the whole period by adding fractions of the active WFstore to WF 
+      if(date %in% leafgrow_period){
+        WF <- WF + WFstore_active/leafout_p
+      }
+
+      # Leaffall
+      # On the first day of the leaffall period:
+      # Define the leafall rate so it decreases linearly over the leaffall period
+      if(date == leaffall_period[1]){
+        leaffall_rate <- WF/leaffall_p
+        WFstore <- WFstore # +0.5*WF # because of energy recovery?
+      }
+      # Leaffall decreases WF linearly over the whole leaffall period until WF = 0
+      if(date %in% leaffall_period){
+        WF <- max(WF - leaffall_rate,0)
+      } 
+    }
+
     
     #Update tree and stand data at the end of this time period,
     #taking mortality, thinning or defoliation into account
@@ -726,6 +853,17 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             StemNo <- StemNo * (1 - delN)
             WF <- WF * (1 - delN * thinWF[thinEventNo])
+            # Account for thinning in the dormant season
+            # During the dormant season WF = 0 and nothing happens when executing the line above
+            # During the active season WFprior has no function and nothing happens when executing the line below 
+            if(phenology == 0) WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])
+            if(phenology == 1){
+              # Since WF of the current season and WF of the following season are decoupled via WFstore,
+                # it is required always remove thinning fractions from WF and WFstore
+              WFstore <- WFstore * (1 - delN * thinWF[thinEventNo])
+              # If thinning occurs during the leafgrow period also WFstore_active needs to be adjusted
+              if(date %in% leafgrow_period) WFstore_active <- WFstore_active * (1 - delN * thinWF[thinEventNo])
+            }
             WR <- WR * (1 - delN * thinWR[thinEventNo])
             WSext <- WS * delN * thinWS[thinEventNo]
             WS <- WS * (1 - delN * thinWS[thinEventNo])
@@ -746,6 +884,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       if (gammaN > 0) {
         delStems <- gammaN * StemNo / 12 / 100
         WF <- WF - mF * delStems * (WF / StemNo)
+        if(phenology == 0) WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
+        if(phenology == 1) WFstore <- WFstore - mF * delStems * (WFstore / StemNo)
         WR <- WR - mR * delStems * (WR / StemNo)
         WSmort <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
@@ -774,6 +914,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         delStems <- StemNo - 1000 * n
         
         WF <- WF - mF * delStems * (WF / StemNo)
+        if(phenology == 0) WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
+        if(phenology == 1) WFstore <- WFstore - mF * delStems * (WFstore / StemNo)
         WR <- WR - mR * delStems * (WR / StemNo)
         WSselfThin <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
@@ -838,8 +980,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:22] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,NEE,LAI,EvapTransp,
-                                  AvStemMass,BasArea,WSext,StandVol_loss, VolProduction_tot,DP,RunOff))
+    out[day,2:23] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,NEE,LAI,EvapTransp,
+                                  AvStemMass,BasArea,WSext,StandVol_loss, VolProduction_tot,DP,RunOff,WFstore))
   }
   
   ###########################################################
