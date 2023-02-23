@@ -172,6 +172,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   StartDate <- as.Date(StartDate,"%d/%m/%Y")
   EndDate <-   seq(StartDate, length=(EndAge-StandAgei)+1, by="years")[(EndAge-StandAgei)+1]
   date <- StartDate
+  year <- as.numeric(format(date,"%Y"))
   currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
   Duration <- as.numeric(EndDate-StartDate) 
   WS <- WSi
@@ -344,12 +345,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=22))
-  colnames(out) <- c("Date","StandAge","StemNo","WF","WR","WS","avDBH","Height",
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=23))
+  colnames(out) <- c("Date","StandAge","Year","StemNo","WF","WR","WS","avDBH","Height",
                      "StandVol","volWCer","volWCdr","NPP","NEE","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
                      "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff")
   out[1,1] <- as.character(date)
-  out[1,2:11] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
+  out[1,2:12] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr))
   
   #Starting Date of the climate data
   selectClimate <- as.numeric(which(date==climate[,1]))
@@ -841,7 +842,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:22] <- as.numeric(c(StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,NEE,LAI,EvapTransp,
+    out[day,2:23] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,volWdr,NPP,NEE,LAI,EvapTransp,
                                   AvStemMass,BasArea,WSext,StandVol_loss, VolProduction_tot,DP,RunOff))
   }
   
