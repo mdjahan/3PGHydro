@@ -370,7 +370,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     SolarRad <- climate$SolarRad[day]
     
     #Temperature data 
-    Tav <- climate$Tav[day]
+    Tav <- (climate$Tmax[day]+climate$Tmin[day])/2
     
     #VPD - mean day-time VPD (vapour pressure deficit)
     #gets daily "mean" VPD in mBar - based on daily max and min temperatures only
@@ -709,12 +709,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
       if(StandAge >= attackAge & attackAge > 0){
         gammaNattack <- gammaN0attack * exp(-((StandAge - attackAge) * 12)/attackTime)
-        delStems = gammaNattack * StemNo / 100
-        WF = WF - mF * delStems * (WF / StemNo)
-        WR = WR - mR * delStems * (WR / StemNo)
-        WS = WS - mS * delStems * (WS / StemNo)
-        StemNo = StemNo - delStems
-        mortality = mortality + delStems
+        delStems <- gammaNattack * StemNo / 100
+        WF <- WF - mF * delStems * (WF / StemNo)
+        WR <- WR - mR * delStems * (WR / StemNo)
+        WS<- WS - mS * delStems * (WS / StemNo)
+        StemNo <- StemNo - delStems
+        mortality <- mortality + delStems
       }
       
       #Perform any thinning events: performed at the beginning of the year
@@ -726,6 +726,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             StemNo <- StemNo * (1 - delN)
             WF <- WF * (1 - delN * thinWF[thinEventNo])
+            WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])
             WR <- WR * (1 - delN * thinWR[thinEventNo])
             WSext <- WS * delN * thinWS[thinEventNo]
             WS <- WS * (1 - delN * thinWS[thinEventNo])
@@ -746,6 +747,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       if (gammaN > 0) {
         delStems <- gammaN * StemNo / 12 / 100
         WF <- WF - mF * delStems * (WF / StemNo)
+        WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
         WR <- WR - mR * delStems * (WR / StemNo)
         WSmort <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
@@ -774,6 +776,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         delStems <- StemNo - 1000 * n
         
         WF <- WF - mF * delStems * (WF / StemNo)
+        WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
         WR <- WR - mR * delStems * (WR / StemNo)
         WSselfThin <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
