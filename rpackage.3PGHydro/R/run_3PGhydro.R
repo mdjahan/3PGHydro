@@ -347,7 +347,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   
   #Write first line of output (= Start conditions)
   out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=23))
-  colnames(out) <- c("Date","StandAge","Year","StemNo","WF","WR","WS","avDBH","Height",
+  colnames(out) <- c("Date","Year","StandAge","StemNo","WF","WR","WS","avDBH","Height",
                      "StandVol","volWCer","volWCdr","NPP","NEE","LAI","Evapotranspiration","AvStemMass","BasArea","WSext",
                      "StandVol_loss", "VolProduction_tot", "DeepPercolation","RunOff")
   out[1,1] <- as.character(date)
