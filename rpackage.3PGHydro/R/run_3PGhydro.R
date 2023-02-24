@@ -11,7 +11,7 @@
 #' @param WRi inital weight of roots in tons
 #' @param WSi inital weight of stems in tons
 #' @param StemNoi initial stem number
-#' @param CO2Concentration select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"
+#' @param CO2Concentration set a constant value or select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"
 #' @param FR fertility rating of site (0-1)
 #' @param HeightEquation choose the height equation (1-2), (1: 3PG Original Equation, 2: Michajlow-Schumacher from Forrester et al. (2021))
 #' @param SVEquation choose the equation used for stand volume calculation (1-3) (1: V = aV * H^VH * D^VB, Forrester et al. (2021), 2: 3PG original function with stem mass & density, 3: simple volume calculation V = FormFactor * CylinderVolume)
@@ -729,7 +729,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             StemNo <- StemNo * (1 - delN)
             WF <- WF * (1 - delN * thinWF[thinEventNo])
-            WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])
+            if(leaffall>0){ WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])}
             WR <- WR * (1 - delN * thinWR[thinEventNo])
             WSext <- WS * delN * thinWS[thinEventNo]
             WS <- WS * (1 - delN * thinWS[thinEventNo])
@@ -750,7 +750,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       if (gammaN > 0) {
         delStems <- gammaN * StemNo / 12 / 100
         WF <- WF - mF * delStems * (WF / StemNo)
-        WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
+        if(leaffall>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
         WR <- WR - mR * delStems * (WR / StemNo)
         WSmort <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
@@ -779,7 +779,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         delStems <- StemNo - 1000 * n
         
         WF <- WF - mF * delStems * (WF / StemNo)
-        WFprior <- WFprior - mF * delStems * (WFprior / StemNo)
+        if(leaffall>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
         WR <- WR - mR * delStems * (WR / StemNo)
         WSselfThin <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)

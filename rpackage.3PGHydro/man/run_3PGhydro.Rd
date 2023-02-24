@@ -52,7 +52,7 @@ run_3PGhydro(
 
 \item{StemNoi}{initial stem number}
 
-\item{CO2Concentration}{select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"}
+\item{CO2Concentration}{set a constant value or select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"}
 
 \item{FR}{fertility rating of site (0-1)}
 
