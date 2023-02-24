@@ -145,8 +145,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   poolFractn <- 0
   
   #CO2 Equations: fitted with values from IIASA
-  CO2HistEq <- function(year) {
-    CO2 <- 0.01375*year^2-53.1101*year+51590.1
+  CO2HistEq <- function(year) { #From 1850 - 2020
+    CO2 <- -3.7892295404645533e+005+5.9852877232176991e+002*year+(-3.1497736226299061e-001)*year^2+5.5268027924225127e-005*year^3
     return(CO2)
   }
   CO2rcp26Eq <- function(year) {
