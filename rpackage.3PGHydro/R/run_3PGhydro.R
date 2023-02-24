@@ -155,7 +155,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     return(CO2)
   }
   CO2rcp45Eq <- function(year) {
-    CO2 <- -0.0200214*year^2+84.1081*year-87793.8
+    CO2 <-     -3.8766027884439137e+006+7.0431120191442196e+003*year+(-4.7962136487811113)*year^2+1.4511109273475317e-003*year^3+(-1.6458308790377209e-007)*year^4
     return(CO2)
   }
   CO2rcp85Eq <- function(year) {
