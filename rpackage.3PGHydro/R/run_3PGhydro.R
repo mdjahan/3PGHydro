@@ -432,6 +432,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     if(CO2Concentration == "RCP2.6") {CO2 <- CO2rcp26Eq(year)}
     if(CO2Concentration == "RCP4.5") {CO2 <- CO2rcp45Eq(year)}
     if(CO2Concentration == "RCP8.5") {CO2 <- CO2rcp85Eq(year)}
+    if(class(CO2Concentration) == "numeric") {CO2 <- CO2Concentration}
     fCalpha <- fCalphax * CO2 / (350 * (fCalphax - 1) + CO2)
     fCg <- fCg0 / (1 + (fCg0 - 1) * CO2 / 350)
     
