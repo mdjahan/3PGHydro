@@ -151,7 +151,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   }
   #RCP 2020 - 2300
   CO2rcp26Eq <- function(year) {
-    CO2 <- -0.014632*year^2+60.2673*year+61617
+    CO2 <-     -3.2667259279140569e+006+6.0119781830141346e+003*year+(-4.1451978885871128)*year^2+1.2692859318090847e-003*year^3+(-1.4564596796234991e-007)*year^4
     return(CO2)
   }
   CO2rcp45Eq <- function(year) {
