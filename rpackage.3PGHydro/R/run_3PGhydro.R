@@ -428,12 +428,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     if(Tav<=0) {fFrost <- 1 - kF} else {fFrost <- 1} 
     
     #CO2 modifiers (fCaplpha/fCg)
-    #CO2 added as functions for historical, RCP2.6, RCP8.5 (for now)
+    #CO2 added as a constant or as functions for historical, RCP2.6, RCp4.5, RCP8.5
+    CO2 <- CO2Concentration
     if(CO2Concentration == "Historical") {CO2 <- CO2HistEq(year)}
     if(CO2Concentration == "RCP2.6") {CO2 <- CO2rcp26Eq(year)}
     if(CO2Concentration == "RCP4.5") {CO2 <- CO2rcp45Eq(year)}
     if(CO2Concentration == "RCP8.5") {CO2 <- CO2rcp85Eq(year)}
-    if(class(CO2Concentration) == "numeric") {CO2 <- CO2Concentration}
     fCalpha <- fCalphax * CO2 / (350 * (fCalphax - 1) + CO2)
     fCg <- fCg0 / (1 + (fCg0 - 1) * CO2 / 350)
     
