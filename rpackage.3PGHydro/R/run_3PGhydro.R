@@ -149,6 +149,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     CO2 <- -3.7892295404645533e+005+5.9852877232176991e+002*year+(-3.1497736226299061e-001)*year^2+5.5268027924225127e-005*year^3
     return(CO2)
   }
+  #RCP 2020 - 2300
   CO2rcp26Eq <- function(year) {
     CO2 <- -0.014632*year^2+60.2673*year+61617
     return(CO2)
@@ -158,7 +159,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     return(CO2)
   }
   CO2rcp85Eq <- function(year) {
-    CO2 <- 0.044329*year^2-176.052*year+175158
+    CO2 <-   1.6251294984491684e+007+(-2.9500368872362102e+004)*year+2.0033017638978215e+001*year^2+(-6.0318600158345221e-003)*year^3+6.7954575575048599e-007*year^4
     return(CO2)
   }
   
