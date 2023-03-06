@@ -852,5 +852,25 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   #Create Final output data
   ###########################################################
   out$Date <- as.Date(out$Date,format="%Y-%m-%d")
-  return(out)
+  if(OutputRes <- "yearly"){
+  #Aggregation to yearly values
+  #End of the year values:
+  endYear <- out
+  endYear$Month <- as.numeric(format(endYear$Date,"%m"))
+  endYear$Day <- as.numeric(format(endYear$Date,"%d"))
+  endYear <- endYear[which(endYear$Month==12 & endYear$Day==31),]
+  endYear <- endYear[order(endYear$Year),]
+  #yearly sums & means
+  data <- out
+  sum <- aggregate(data,list(Year=data$Year),sum)
+  mean <- aggregate(data,list(Year=data$Year),mean)
+  #output frame:
+  out <- data.frame(year=endYear$Year,StandAge=round(endYear$StandAge),StemNo=endYear$StemNo,WF=endYear$WF,WR=endYear$WR,WS=endYear$WS,
+                    avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,volWCer=mean$volWCer,volWCdr=mean$volWCdr,
+                    NPP=sum$NPP,NEE=sum$NEE,LAI=mean$LAI,Evapotranspiration=sum$Evapotranspiration,AvStemMass=endYear$AvStemMass,BasArea=endYear$BasArea,
+                    WSext=sum$WSext,StandVol_loss=sum$StandVol_loss,VolProduction_tot=endYear$VolProduction_tot,
+                    DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff)
+}
+return(out)
+}
 }
