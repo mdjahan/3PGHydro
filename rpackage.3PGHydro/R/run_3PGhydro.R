@@ -854,7 +854,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   #Create Final output data
   ###########################################################
   out$Date <- as.Date(out$Date,format="%Y-%m-%d")
-  if(OutputRes <- "yearly"){
+  if(OutputRes == "yearly"){
   #Aggregation to yearly values
   #End of the year values:
   endYear <- out
