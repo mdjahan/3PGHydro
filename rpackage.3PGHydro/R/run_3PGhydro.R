@@ -873,4 +873,3 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
 }
 return(out)
 }
-}
