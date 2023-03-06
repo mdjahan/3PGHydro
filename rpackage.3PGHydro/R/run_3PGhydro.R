@@ -25,7 +25,7 @@
 #' @param thinWF thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWR thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWS thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
-#' @OutputRes resolution of output: daily or yearly 
+#' @param OutputRes resolution of output: daily or yearly 
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
