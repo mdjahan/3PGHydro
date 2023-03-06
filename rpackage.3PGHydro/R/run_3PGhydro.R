@@ -25,6 +25,7 @@
 #' @param thinWF thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWR thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWS thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
+#' @OutputRes resolution of output: daily or yearly 
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
@@ -51,8 +52,9 @@
 #' thinVals <- c(250,200,150) 
 #' thinWF <- rep(0.8,length(thinAges)) 
 #' thinWR <- rep(0.8,length(thinAges)) 
-#' thinWS <- rep(0.8,length(thinAges))  
-#' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
+#' thinWS <- rep(0.8,length(thinAges))
+#' OutputRes <- "daily"
+#' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
 #' @export
 run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS){
   
