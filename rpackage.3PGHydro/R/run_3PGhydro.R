@@ -863,7 +863,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   endYear <- endYear[which(endYear$Month==12 & endYear$Day==31),]
   endYear <- endYear[order(endYear$Year),]
   #yearly sums & means
-  data <- out
+  data <- out[,-1]
   sum <- aggregate(data,list(Year=data$Year),sum)
   mean <- aggregate(data,list(Year=data$Year),mean)
   #output frame:
