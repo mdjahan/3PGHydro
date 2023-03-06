@@ -3,11 +3,11 @@ install_github("mdjahan/3PGHydro/rpackage.3PGHydro/")
 library(rpackage.3PGHydro)
 ?run_3PGhydro
 #
-setwd("YOUR_DATA_PATH")
+setwd("C:/Users/Marc Djahangard/Documents/IFE/2022/3_3PG/3_3PG_Hydro_R/example")
 
 #climate data
 climate <- read.csv("climate.csv")
-climate$date <- as.Date(climate$date,"%d/%m/%Y")
+climate$date <- as.Date(climate$date,format="%d/%m/%Y")
 
 #load 3PG parameters
 Parameter <- read.csv("3PG_Parameter.csv") #parameters from Forrester et al. 2021
@@ -25,22 +25,26 @@ WFi <- 10
 WRi <- 20
 CO2Concentration <- "Historical"
 FR <- 0.5
-HeightEquation <- 2 
-SVEquation <- 1 #1 is with parameters and form SV = a * H^b * D^c (Forrester et al. 2021), 2: with WS & density, 3: backup --> simple with form factor 0.7
+HeightEquation <- 1 
+SVEquation <- 2
 #Soil
 SoilClass <- 2
 EffectiveRootZoneDepth <- 1
 DeepRootZoneDepth <- 5
-RocksER <- 0.2 #share of rocky parts/skeleton in effective root zone
-RocksDR <- 0.4 #share of rocky parts/skeleton in deep root zone
-thinAges <- NULL
-thinVals <- NULL
-thinWF <- NULL 
-thinWR <- NULL 
-thinWS <- NULL 
+RocksER <- 0.2 
+RocksDR <- 0.4 
+thinAges <- NULL #c(30,40,50,60)
+thinVals <- NULL #c(450,400,350,300)
+thinWF <- NULL #c(1,1,1,1)
+thinWR <- NULL #c(1,1,1,1)
+thinWS <- NULL #c(1,1,1,1)
 
-#Run the function
-out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
+OutputRes <- "daily"
 
+#Run 3PG-Hydro
+out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,HeightEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
 
+#Yearly Output
+OutputRes <- "yearly"
+out_yearly <-  run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,HeightEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
 
