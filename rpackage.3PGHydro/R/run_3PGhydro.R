@@ -351,11 +351,11 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=25))
   colnames(out) <- c("Date","Year","StandAge","StemNo","WF","WR","WS","avDBH","Height","StandVol",
                      "LAI", "volWCer","ASWer","volWCdr","ASWdr",
-                     "VolProduction_tot","BasalArea","GPP","NPP","NEE","LAI",
+                     "VolProduction_tot","BasalArea","GPP","NPP","NEE",
                      "Evapotranspiration","DeepPercolation","RunOff",
                      "WSextracted","StandVol_loss")
   out[1,1] <- as.character(date)
-  out[1,2:14] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,erASW,volWdr,drASW))
+  out[1,2:15] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW))
   
   #Starting Date of the climate data
   selectClimate <- as.numeric(which(date==climate[,1]))
@@ -848,8 +848,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:25] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,volWer,erASW,volWdr,drASW,VolProduction_tot,
-                                  BasArea,GPP,NPP,NEE,LAI,EvapTransp,DP,RunOff,WSext,StandVol_loss)) 
+    out[day,2:25] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
+                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,WSext,StandVol_loss)) 
   }
 
   ###########################################################
@@ -870,8 +870,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   mean <- aggregate(data,list(Year=data$Year),mean)
   #output frame:
   out <- data.frame(year=endYear$Year,StandAge=round(endYear$StandAge),StemNo=round(endYear$StemNo),WF=endYear$WF,WR=endYear$WR,WS=endYear$WS,
-                    avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
-                    VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE,LAI=mean$LAI, 
+                    avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
+                    VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
                     Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
                     WSextracted=sum$WSextracted,StandVol_loss=sum$StandVol_loss)
 }
