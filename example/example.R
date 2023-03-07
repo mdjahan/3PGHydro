@@ -18,7 +18,7 @@ p <- Parameter$Fagus.sylvatica
 lat <- 47.5
 StartDate <- "01/01/1960"
 StandAgei <- 30
-EndAge <- 65
+EndAge <- 80
 StemNoi <- 600
 WSi <- 135
 WFi <- 8
