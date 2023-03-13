@@ -702,14 +702,14 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Leaf grow & fall
     if (leaffall > 0){
       #Growing season:
-      if(WF == 0 & currentMonth < 5){ #start in january
+      if(WF == 0 & currentMonth < 10){ #start in january
         GDD <- max(Tav-5,0) #Growing: temp. threshold: 5°C,  
         GDDS <- GDDS+GDD
       }
-      if(GDDS>20 & WF < WFprior){  #activate when GDD threshold: 50 GDD, till WFprior is reached
+      if(GDDS>30 & WF < WFprior){  #activate when GDD threshold: 50 GDD, till WFprior is reached
         WF <- min(WF + WFprior/30,WFprior) #grow dynamically over the next 30 days and stop afterwards
       }
-      if(GDDS>20 & WF >= WFprior){
+      if(GDDS>30 & WF >= WFprior){
         GDDS <- 0
       }
       #Leaffall: fixed
