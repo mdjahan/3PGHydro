@@ -189,6 +189,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   WSselfThin <- 0
   WSMort <- 0
   accV <- 0
+  #Initial growing degree day sums 
+  GDDS <- 0
   #StandVol_ext_single <- 0
   
   #Assign Soil Parameters and 3PG original SWconstant and SWpower as function of Soil Class
@@ -295,6 +297,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   aSnow <- 0
   aSnowInt <- 0
   
+
   #set age depndent factores
   
   #SLA = expF(StandAge, SLA0, SLA1, tSLA, 2)
@@ -325,6 +328,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     kgammaF <- 12 * log(1 + gammaF1 / gammaF0) / tgammaF #recheck!
     gammaF <- gammaF1 * gammaF0 / (gammaF0 + (gammaF1 - gammaF0) * exp(-kgammaF * StandAge))
   }
+  
   #Leaf fall
   if(leaffall>0){
     currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
@@ -333,6 +337,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       WF <- 0
     }
   }
+  
   
   #Initialize stand data
   AvStemMass <- WS * 1000 / StemNo  
@@ -371,6 +376,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     
     #year
     year <- as.numeric(format(date,"%Y"))
+    MonthOneDayBefore <- currentMonth #needed for end of month calculations
+    currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
     
     #Solar Radiation
     SolarRad <- climate$SolarRad[day]
@@ -692,15 +699,25 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     WS <- WS + incrWS
     TotalW <- WF + WR + WS
     
-    #Leaf fall
-    MonthOneDayBefore <- currentMonth #needed for end of month calculations
-    currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
-    if(leaffall>0){
-      currentDayMonth <- format(as.Date(date,format="%d/%m/%Y"),"%d-%m")
-      if(currentDayMonth==paste0("01-",leaffall)) WFprior <- WF
-      if(currentMonth==leaffall) WF <- max(WF - WFprior/31,0) #decrease dynamically over the month: end of leaffall no leaves
+    #Leaf grow & fall
+    if (leaffall > 0){
+      #Growing season:
+      if(WF == 0 & currentMonth < 5){ #start in january
+        GDD <- max(Tav-5,0) #Growing: temp. threshold: 5°C,  
+        GDDS <- GDDS+GDD
+      }
+      if(GDDS>50 & WF < WFprior){  #activate when GDD threshold: 50 GDD, till WFprior is reached
+        WF <- min(WF + WFprior/30,WFprior) #grow dynamically over the next 30 days and stop afterwards
+      }
+      if(GDDS>50 & WF >= WFprior){
+        GDDS <- 0
+      }
+      #Leaffall: fixed
+      if (currentMonth == leaffall){
+        if(format(as.Date(date,format="%d/%m/%Y"),"%d")=="01") WFprior <- WF #set WFprior at first day of leaffall month
+        WF <- max(WF - WFprior/31,0)
+      }
       if(currentMonth==leaffall+1) WF <- 0
-      if(currentMonth==leafgrow) WF <- min(WF + WFprior/31,WFprior) #grow dynamically over the whole month: end of leafgrow WFprior 
     }
     
     #Update tree and stand data at the end of this time period,
@@ -851,29 +868,29 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     out[day,2:25] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
                                   BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,WSext,StandVol_loss)) 
   }
-
+  
   ###########################################################
   #Create Final output data
   ###########################################################
   out$Date <- as.Date(out$Date,format="%Y-%m-%d")
   if(OutputRes == "yearly"){
-  #Aggregation to yearly values
-  #End of the year values:
-  endYear <- out
-  endYear$Month <- as.numeric(format(endYear$Date,"%m"))
-  endYear$Day <- as.numeric(format(endYear$Date,"%d"))
-  endYear <- endYear[which(endYear$Month==12 & endYear$Day==31),]
-  endYear <- endYear[order(endYear$Year),]
-  #yearly sums & means
-  data <- out[,-1]
-  sum <- aggregate(data,list(Year=data$Year),sum)
-  mean <- aggregate(data,list(Year=data$Year),mean)
-  #output frame:
-  out <- data.frame(year=endYear$Year,StandAge=round(endYear$StandAge),StemNo=round(endYear$StemNo),WF=endYear$WF,WR=endYear$WR,WS=endYear$WS,
-                    avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
-                    VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
-                    Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
-                    WSextracted=sum$WSextracted,StandVol_loss=sum$StandVol_loss)
-}
-return(out)
+    #Aggregation to yearly values
+    #End of the year values:
+    endYear <- out
+    endYear$Month <- as.numeric(format(endYear$Date,"%m"))
+    endYear$Day <- as.numeric(format(endYear$Date,"%d"))
+    endYear <- endYear[which(endYear$Month==12 & endYear$Day==31),]
+    endYear <- endYear[order(endYear$Year),]
+    #yearly sums & means
+    data <- out[,-1]
+    sum <- aggregate(data,list(Year=data$Year),sum)
+    mean <- aggregate(data,list(Year=data$Year),mean)
+    #output frame:
+    out <- data.frame(year=endYear$Year,StandAge=round(endYear$StandAge),StemNo=round(endYear$StemNo),WF=endYear$WF,WR=endYear$WR,WS=endYear$WS,
+                      avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
+                      VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
+                      Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
+                      WSextracted=sum$WSextracted,StandVol_loss=sum$StandVol_loss)
+  }
+  return(out)
 }
