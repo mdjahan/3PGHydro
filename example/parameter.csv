@@ -9,8 +9,8 @@ gammaF1,0.000107,0.019
 gammaF0,0.0001024,0.002
 tgammaF,22.17569,80.79
 gammaR,0.000127,0
-leafgrow,0,4
-leaffall,0,10
+GDDcount,0,30
+GDDtemp,0,10
 Tmin,-4.239,-6.834
 Tmax,36.126794,33.96
 Topt,19.09716,14.64
