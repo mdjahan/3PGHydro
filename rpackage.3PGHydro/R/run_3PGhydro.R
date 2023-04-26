@@ -56,7 +56,7 @@
 #' OutputRes <- "daily"
 #' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
 #' @export
-run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes,GDDcount,GDDtemp){
+run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes){
   
   ############################################################
   #parameters
@@ -71,8 +71,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   gammaF0 <- p[8]
   tgammaF <- p[9]
   gammaR <- p[10]
-  leafgrow <- p[11]
-  leaffall <- p[12]
+  GDDcount <- p[11]
+  GDDtemp <- p[12]
   Tmin <- p[13]
   Tmax <- p[14]
   Topt <- p[15]
@@ -329,10 +329,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     gammaF <- gammaF1 * gammaF0 / (gammaF0 + (gammaF1 - gammaF0) * exp(-kgammaF * StandAge))
   }
   
-  #Leaf fall
-  if(leaffall>0){
+  #Initial leaf condition: start between may and october has leaves
+  if(GDDcount>0){
     currentMonth <- as.numeric(format(as.Date(date,format="%d/%m/%Y"),"%m"))
-    if(leafgrow > currentMonth | currentMonth >= leaffall){
+    if(4 > currentMonth | currentMonth >= 10){
       WFprior <- WF
       WF <- 0
     }
@@ -700,7 +700,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     TotalW <- WF + WR + WS
     
     #Leaf grow & fall
-    if (leaffall > 0){
+    if (GDDcount > 0){
       #Growing season:
       if(WF == 0 & currentMonth < 10){ #start in january
         GDD <- max(Tav-GDDtemp,0) #Growing: temp. threshold: GDDtemp in °C,  
@@ -712,12 +712,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       if(GDDS>GDDcount & WF >= WFprior){
         GDDS <- 0
       }
-      #Leaffall: fixed
-      if (currentMonth == leaffall){
-        if(format(as.Date(date,format="%d/%m/%Y"),"%d")=="01") WFprior <- WF #set WFprior at first day of leaffall month
+      #Leaffall: leaves fall in october and no more leaves in november
+      if (currentMonth == 10){
+        if(format(as.Date(date,format="%d/%m/%Y"),"%d")=="01") WFprior <- WF #set WFprior at first day of october
         WF <- max(WF - WFprior/31,0)
       }
-      if(currentMonth==leaffall+1) WF <- 0
+      if(currentMonth==11) WF <- 0
     }
     
     #Update tree and stand data at the end of this time period,
@@ -750,7 +750,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             StemNo <- StemNo * (1 - delN)
             WF <- WF * (1 - delN * thinWF[thinEventNo])
-            if(leaffall>0){ WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])}
+            if(GDDcount>0){ WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])}
             WR <- WR * (1 - delN * thinWR[thinEventNo])
             WSext <- WS * delN * thinWS[thinEventNo]
             WS <- WS * (1 - delN * thinWS[thinEventNo])
@@ -771,7 +771,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       if (gammaN > 0) {
         delStems <- gammaN * StemNo / 12 / 100
         WF <- WF - mF * delStems * (WF / StemNo)
-        if(leaffall>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
+        if(GDDcount>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
         WR <- WR - mR * delStems * (WR / StemNo)
         WSmort <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
@@ -800,7 +800,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         delStems <- StemNo - 1000 * n
         
         WF <- WF - mF * delStems * (WF / StemNo)
-        if(leaffall>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
+        if(GDDcount>0){ WFprior <- WFprior - mF * delStems * (WFprior / StemNo)}
         WR <- WR - mR * delStems * (WR / StemNo)
         WSselfThin <- mS * delStems * (WS / StemNo)
         WS <- WS - mS * delStems * (WS / StemNo)
