@@ -119,13 +119,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   aV <- p[56]
   nVB <- p[57]
   nVH <- p[58]
-    #Parameter for Soil Evaporation
-  maxgSoil <- 0.001 #maximum soil conductance
-  gAS <- 0.015 #Soil aerodynamic conductance
-  #For NEE calculation (from Meyer et al. (2018)
-  Rh10soil <- 0.00025 #base-respiration rate at 10 degrees (tonsDM/tonC/d); range: 0.0001 - 0.0005
-  Q10 <- 2 #Q10 for heterotrophic respiration
-  Csoil <- 40 #soil carbon content (tons/ha)
   #Parameter for beetle attack
   gammaN0attack <- p[59]
   attackAge <- p[60]
@@ -144,7 +137,13 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   rhoAir <- 1.2       # density of air, kg/m3
   lambda <- 2460000#  # latent heat of vapourisation of H2O (J/kg)
   VPDconv <- 0.000622 # convert VPD to saturation deficit = 18/29/1000
-  #  
+  #Parameter for Soil Evaporation
+  maxgSoil <- 0.001 #maximum soil conductance
+  gAS <- 0.015 #Soil aerodynamic conductance
+  #For NEE calculation (from Meyer et al. (2018)
+  Rh10soil <- 0.00025 #base-respiration rate at 10 degrees (tonsDM/tonC/d); range: 0.0001 - 0.0005
+  Q10 <- 2 #Q10 for heterotrophic respiration
+  Csoil <- 40 #soil carbon content (tons/ha)
   poolFractn <- 0
   
   #CO2 Equations: fitted with values from IIASA
