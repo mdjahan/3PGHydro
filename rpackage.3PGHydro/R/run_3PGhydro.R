@@ -59,8 +59,8 @@
 run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes){
   
   ############################################################
-  #parameters
-  ##############################################################
+  #parameters from sheet 'p'
+  #############################################################
   pFS2 <- p[1]
   pFS20 <- p[2]
   aWs <- p[3]
@@ -123,7 +123,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   gammaN0attack <- p[59]
   attackAge <- p[60]
   attackTime <- p[61] 
-  #
+  ############################################################
+  #additional parameters: frost, snowmelt, radiation, evapotranspiration, soil respiration 
+  #############################################################
   kF <- 1
   SnowmMeltFactor <- 2.5
   #Conversion factors
@@ -145,7 +147,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   Q10 <- 2 #Q10 for heterotrophic respiration
   Csoil <- 40 #soil carbon content (tons/ha)
   poolFractn <- 0
-  
+  ############################################################
+  #Yearly CO2 values from 1850 - 2300
+  #############################################################
   #CO2 Equations: fitted with values from IIASA
   CO2HistEq <- function(year) { #From 1850 - 2020
     CO2 <- -3.7892295404645533e+005+5.9852877232176991e+002*year+(-3.1497736226299061e-001)*year^2+5.5268027924225127e-005*year^3
@@ -198,15 +202,15 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   if (SoilClass > 0) {
     #3PG Hydro Soil Class Parameters
     if (SoilClass == 1){
-      SWconst	<- 0.8
-      SWpower	<- 12
-      volRes <- 0.02
-      volSat <- 0.38
-      VGn <- 1.55
-      VGalpha <- 4
-      kS <- 3.5
-      fKdr <- 1
-      maxInf <- 30
+      SWconst	<- 0.8 #3PG Original
+      SWpower	<- 12 #3PG Original
+      volRes <- 0.02 #vol. residual water content
+      volSat <- 0.38 #vol. saturation water content
+      VGn <- 1.55 #Van-Genuchten n
+      VGalpha <- 4 #Van-Genuchten alpha
+      kS <- 3.5 #saturated hydraulic conductivity (m/day)
+      fKdr <- 1 #deep soil compaction (0-1)
+      maxInf <- 30 #maximum rainfall infiltration (mm/day)
     }
     if (SoilClass == 2){
       SWconst	<- 0.7
@@ -245,7 +249,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   #Soil Depth
   depthER <- EffectiveRootZoneDepth
   depthDR <- DeepRootZoneDepth
-  SkER <- RocksER
+  SkER <- RocksER 
   SkDR <- RocksDR
   #Soil Wilting Point & Field Capacity
   #h in [m] at FC: 3.36514; at WP: 152.961
@@ -367,7 +371,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   climate <- climate[selectClimate:length(climate[,1]),]
   
   ###########################################################
-  #Do daily calculations
+  #Model loop: daily timesteps
   ###########################################################
   for (day in 2:Duration){
     
@@ -529,9 +533,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Rain Interception
     RainIntcptn <- Rain * fracRainIntcptn
     dayTF <- Rain - RainIntcptn #daily through fall
-    
+
+    ###############################################################################
     #water balance: New sub-model
-    #Set initials 0
+    #Set each day flows to 0
     SupIrrig <- 0
     RunOff <- 0
     DP <- 0
@@ -541,7 +546,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     drUpflow <- 0
     #Infiltration water
     pIW <- dayTF + pooledSW + SnowMelt #potential infiltration, later add snow melt
-    if(pIW > maxInf){#infiltration cannot exceed max daily infiltration 
+    if(pIW > maxInf){#infiltration cannot exceed max daily infiltration, rest becomes runoff 
       IW <- maxInf
       RunOff <- pIW - IW
     } else {
@@ -557,7 +562,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     EvapTransp <- min(erASW-erASWwp, Transp) #ET can not exceed erASW Wilting Point
     if(EvapTransp<0) EvapTransp <- 0 #error correction if erASW < erASWwp
     erASW <-  erASW - EvapTransp
-    #Soil Evaporation
+    
+    #Soil Evaporation: seperate calculation
     if(erASW > erASWres){
       gSoil <- maxgSoil * ((erASW - erASWres) / (erASWsat - erASWres))  #0.0005 = maximum soil conductance, soil conductance
     } else{
