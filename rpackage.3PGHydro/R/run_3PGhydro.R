@@ -459,7 +459,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     
     #Physiological Modifier (PhysMod)
     PhysMod <- min(fVPD, fSW) * fAge 
-    
+
+    ###############################################################################
     #Determine gross and net biomass production
     
     #Canopy cover and light interception (CanCover, lightIntcptn)
@@ -708,31 +709,31 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Leaf grow & fall
     if (GDDcount > 0){
       #Growing season:
-      if(WF == 0 & currentMonth < 10){ #start in january
+      if(WF == 0 & currentMonth < 9){ #start in january (after august no leaves built)
         GDD <- max(Tav-GDDtemp,0) #Growing: temp. threshold: GDDtemp in °C,  
         GDDS <- GDDS+GDD
       }
-      if(GDDS>GDDcount & WF < WFprior){  #activate when GDD threshold: 50 GDD, till WFprior is reached
-        WF <- min(WF + WFprior/GDDcount,WFprior) #grow dynamically over the next 30 days and stop afterwards
+      if(GDDS>GDDcount & WF < WFprior){  #activate when GDD threshold reached and let grow till WFprior is reached
+        WF <- min(WF + WFprior/GDDcount,WFprior) #grow dynamically over the next month and stop afterwards
       }
-      if(GDDS>GDDcount & WF >= WFprior){
+      if(GDDS>GDDcount & WF >= WFprior){ #in case condition not reached
         GDDS <- 0
       }
-      #Leaffall: leaves fall in october and no more leaves in november
+      #Leaffall: leaves fall dynamically in october and no more leaves in november
       if (currentMonth == 10){
         if(format(as.Date(date,format="%d/%m/%Y"),"%d")=="01") WFprior <- WF #set WFprior at first day of october
         WF <- max(WF - WFprior/31,0)
       }
       if(currentMonth==11) WF <- 0
     }
-    
+
+    ###############################################################################
     #Update tree and stand data at the end of this time period,
-    #taking mortality, thinning or defoliation into account
+    #taking mortality, disturbances (beetle), thinning and defoliation into account
     
     #Age: daily age count, accounting for leap year
     lengthYear <- as.numeric(strftime(as.Date(paste0("31-12-",year),"%d-%m-%Y"),format = "%j"))
     StandAge <- StandAge + 1/lengthYear
-    
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
     if(MonthOneDayBefore!=currentMonth){
