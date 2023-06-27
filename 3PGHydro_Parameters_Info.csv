@@ -9,8 +9,8 @@ gammaF1,1/month,Maximum litterfall rate
 gammaF0,1/month,Litterfall rate at t = 0
 tgammaF,months,Age at which litterfall rate has median value
 gammaR,1/month,Average monthly root turnover rate
-leafgrow,month,Month when leafgrow starts
-leaffall,month,Month when leaffall starts
+GDDcount,°C, Sum of growing degree days 
+GDDtemp,°C, Threshold of temperature to become GDD
 Tmin,deg. C,Minimum temperature for growth
 Tmax,deg. C,Maximum temperature for growth
 Topt,deg. C,Optimum temperature for growth
