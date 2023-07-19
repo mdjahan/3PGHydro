@@ -5,7 +5,7 @@
 
 ## V1.1
 
-We integrated a dynamic leaf fall and leaf growth model for decidious trees as well as dynamic CO2-concentration function that prdouces yearly values for historical period as well as climate change scenarios RCP2.6, RCP4.5 & RCP8.5. Moreover, 3PG-Hydro integrates the stand volume & height calculation method as described in Forrester et al. (2021) (https://doi.org/10.1007/s10342-021-01370-3). Therefore, the parameters from Forrester et al. (2021) can be used.
+We integrated a dynamic leaf fall and leaf growth model for decidious trees based on the Growing-Degreee-Days method. Moroever, we developed a dynamic CO2-concentration function that prdouces yearly values for the historical period as well as climate change scenarios RCP2.6, RCP4.5 & RCP8.5. Moreover, 3PG-Hydro integrates the stand volume & height calculation method as described in Forrester et al. (2021) (https://doi.org/10.1007/s10342-021-01370-3). Therefore, the parameters from Forrester et al. (2021) can be used.
 Moreover, V1.1 includes calculation of soil respiration to provide the output of net ecosystem exchange (NEE) adpated from Meyer et al. (2018) (https://doi.org/10.1016/j.foreco.2018.01.034) and a module for simulating a bark beetle attack adapted from Meyer et al. (2017) (https://doi.org/10.1016/j.foreco.2017.03.019).
 
 ## V1.0
