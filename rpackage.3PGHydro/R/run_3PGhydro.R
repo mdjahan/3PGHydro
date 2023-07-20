@@ -393,7 +393,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #VPD is the difference (deficit) between the amount of moisture in the air and how much moisture the air can hold when it is saturated. 
     VPDx <- 6.1078 * exp(17.269 * climate$Tmax[day] / (237.3 + climate$Tmax[day]))
     VPDn <-  6.1078 * exp(17.269 * climate$Tmin[day] / (237.3 + climate$Tmin[day]))
-    VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
+    VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit) #to do: include daily relative humidity!
     
     #DayLength
     #gets fraction of day when sun is "up"
@@ -572,7 +572,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Penman-Monteith equation for computing soil evaporation
     #in kg/m2/day, which is converted to mm/day.
     netRad <- Qb * (RADsoil * 10 ^ 6 / DayLength)  #Q in MJ/m2/day --> W/m2, no Qa because all radiation on soil
-    defTerm <- rhoAir * lambda * (VPDconv * VPD) * gAS
+    defTerm <- rhoAir * lambda * (VPDconv * VPD) * gAS #note: does vpd has to be reduced by waht transpriation is changing?
     div <-  gSoil * (1 + e20) + gAS
     ESoil <- gSoil * (e20 * netRad + defTerm) / div      #in J/m2/s
     getEvap <- ESoil / lambda * DayLength    #converted to kg/m2/day
