@@ -30,6 +30,7 @@
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
+#'relativeHumidity <- "off"
 #'p <- read.csv("3PG_Parameter.csv") 
 #'p <- p$species1 #select species parameters column
 #' lat <- 40.5
