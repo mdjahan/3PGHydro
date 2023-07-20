@@ -14,7 +14,7 @@
 #' @param CO2Concentration set a constant value or select which CO2 concentration equation should be used: "Historical", "RCP2.6", "RCP4.5", "RCP8.5"
 #' @param FR fertility rating of site (0-1)
 #' @param HeightEquation choose the height equation (1-2), (1: 3PG Original Equation, 2: Michajlow-Schumacher from Forrester et al. (2021))
-#' @param SVEquation choose the equation used for stand volume calculation (1-3) (1: 3PG original function with stem mass & density,2: V = aV * H^VH * D^VB, Forrester et al. (2021), 3: simple volume calculation V = FormFactor * CylinderVolume)
+#' @param SVEquation choose the equation used for stand volume calculation (1-3) (1: 3PG original function with stem mass & density,2: V = aV * H^VH * D^VB, Forrester et al. (2021))
 #' @param SoilClass soil classes, type number 1 - 4 (1: sand, 2: sandy loam, 3: clay loam, 4: clay)
 #' @param EffectiveRootZoneDepth depth of effective root zone in meter
 #' @param DeepRootZoneDepth depth of deep root zone in meter
@@ -353,7 +353,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   #Stand volume m3/ha (excluding branch and bark fraction, see. sands 2002 p.5)
   if(SVEquation==1) StandVol <- WS * (1 - fracBB) / Density #3PG original equation
   if(SVEquation==2) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
-  if(SVEquation==3) StandVol <- 0.7 * ((avDBH/200)^2*pi) * Height * StemNo #simple volume equation
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
@@ -858,7 +857,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     StandVol_loss <- 0
     if(SVEquation==1) StandVol <- WS * (1 - fracBB) / Density #3PG original equation
     if(SVEquation==2) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
-    if(SVEquation==3) StandVol <- 0.7 * ((avDBH/200)^2*pi) * Height * StemNo #simple volume equation
     if(StandVol < oldV) StandVol_loss <- oldV - StandVol
     oldV <- StandVol
     
