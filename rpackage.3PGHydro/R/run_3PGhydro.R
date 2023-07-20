@@ -30,7 +30,7 @@
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
-#'relativeHumidity <- "off"
+#'relativeHumidity <- FALSE
 #'p <- read.csv("3PG_Parameter.csv") 
 #'p <- p$species1 #select species parameters column
 #' lat <- 40.5
@@ -56,7 +56,7 @@
 #' thinWR <- rep(0.8,length(thinAges)) 
 #' thinWS <- rep(0.8,length(thinAges))
 #' OutputRes <- "daily"
-#' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
+#' out <- run_3PGhydro(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
 #' @export
 run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes){
   
@@ -395,7 +395,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #VPD is the difference (deficit) between the amount of moisture in the air and how much moisture the air can hold when it is saturated. 
     VPDx <- 6.1078 * exp(17.269 * climate$Tmax[day] / (237.3 + climate$Tmax[day]))
     VPDn <-  6.1078 * exp(17.269 * climate$Tmin[day] / (237.3 + climate$Tmin[day]))
-    VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit) #to do: include daily relative humidity!
+    VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
+    if(relativeHumidity==TRUE)
     
     #DayLength
     #gets fraction of day when sun is "up"
