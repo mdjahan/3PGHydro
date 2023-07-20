@@ -396,7 +396,7 @@ run_3PGhydro <- function(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndA
     VPDx <- 6.1078 * exp(17.269 * climate$Tmax[day] / (237.3 + climate$Tmax[day]))
     VPDn <-  6.1078 * exp(17.269 * climate$Tmin[day] / (237.3 + climate$Tmin[day]))
     VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
-    if(relativeHumidity==TRUE)
+    if(relativeHumidity==TRUE) VPD <-  (VPDx + VPDn) / 2 * (climate$relHum)
     
     #DayLength
     #gets fraction of day when sun is "up"
