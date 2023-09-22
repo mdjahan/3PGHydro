@@ -3,7 +3,7 @@
 library(rpackage.3PGHydro)
 ?run_3PGhydro
 #
-setwd("C:/Users/Marc Djahangard/Documents/IFE/2022/3_3PG/3_3PG_Hydro_R/example")
+setwd("YOURPATH")
 
 #climate data
 climate <- read.csv("climate.csv")
