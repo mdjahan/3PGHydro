@@ -46,7 +46,7 @@ thinWS <- NULL #c(1,1,1,1)
 OutputRes <- "daily"
 
 #RUN: 3PG-Hydro
-out <- run_3PGhydro <- function(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
+out <- run_3PGhydro(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
 
 #Some Plots:
 par(mfrow=c(2,2))
@@ -64,5 +64,5 @@ plot(out$LAI[730:1095],x=out$Date[730:1095],type="l",main="LAI")
 
 #Yearly Output
 OutputRes <- "yearly"
-out_yearly <-  run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SVEquation,HeightEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
+out_yearly <-  run_3PGhydro(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes)
 
