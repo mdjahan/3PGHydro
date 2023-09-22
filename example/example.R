@@ -9,9 +9,6 @@ setwd("YOURPATH")
 climate <- read.csv("climate.csv")
 climate$date <- as.Date(climate$date,format="%d/%m/%Y")
 
-#climate data has relative humidity? (optional)
-relativeHumidity <- FALSE
-
 #load 3PG parameters
 Parameter <- read.csv("parameter.csv") #P.abies from Forrester et al. 2021; F. sylvatica from Augustynczik et al 2017
 #select species
