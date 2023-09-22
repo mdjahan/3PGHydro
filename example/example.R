@@ -33,6 +33,8 @@ EffectiveRootZoneDepth <- 1
 DeepRootZoneDepth <- 3
 RocksER <- 0.2 
 RocksDR <- 0.4 
+
+#Management
 thinAges <- NULL #c(30,40,50,60)
 thinVals <- NULL #c(450,400,350,300)
 thinWF <- NULL #c(1,1,1,1)
