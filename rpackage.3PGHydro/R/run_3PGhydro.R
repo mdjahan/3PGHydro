@@ -2,7 +2,6 @@
 #'
 #' 3PG-Hydro is an update of the original 3PG Forest Growth model by Landsberg and Waring (1997) (DOI:10.1016/S0378-1127(97)00026-1). 3PG-Hydro calculates on a daily timestep, includes a soil-water-model as well as a snow routine. Further information in the publication on 3PG-Hydro by Yousefpour and Djahangard (2021) (DOI:10.3390/f12121729). 3PG-Hydro is available as an R-package, coding done by Anja Nölte & Marc Djahangard.
 #' @param climate Climate data as .csv file, mandatory column names ("date" ("dd/mm/yyyy"),"Tav","Tmax","Tmin","Rain","SolarRad", optional:"relHum")
-#' @param relativeHumidity Including relative humidty in evapotranspiration calculation can be set on, however thus daily values of relative humidity have to be provided
 #' @param p 3PG tree species parameter .csv file
 #' @param lat site latitude UTM
 #' @param StartDate starting date, format: "dd/mm/yyyy"
@@ -30,7 +29,6 @@
 #' @return output file in daily time steps: Date, StandAge, StemNo, WF, WR, WS, DBH, Height, StandVol, volWCer, volWCdr, NPP, NEE, LAI, Evapotranspiration, AvStemMass, Basal Area, Self Thinning, WSext, StandVol_loss, VolProduction_tot, Deep Percolation, Run Off 
 #' @examples 
 #'climate <- read.csv("climate.csv")
-#'relativeHumidity <- FALSE
 #'p <- read.csv("3PG_Parameter.csv") 
 #'p <- p$species1 #select species parameters column
 #' lat <- 40.5
@@ -58,7 +56,7 @@
 #' OutputRes <- "daily"
 #' out <- run_3PGhydro(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS)
 #' @export
-run_3PGhydro <- function(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes){
+run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,StemNoi,CO2Concentration,FR,HeightEquation,SVEquation,SoilClass,EffectiveRootZoneDepth,DeepRootZoneDepth,RocksER,RocksDR,thinAges,thinVals,thinWF,thinWR,thinWS,OutputRes){
   
   ############################################################
   #parameters from sheet 'p'
@@ -396,7 +394,6 @@ run_3PGhydro <- function(climate,relativeHumidity,p,lat,StartDate,StandAgei,EndA
     VPDx <- 6.1078 * exp(17.269 * climate$Tmax[day] / (237.3 + climate$Tmax[day]))
     VPDn <-  6.1078 * exp(17.269 * climate$Tmin[day] / (237.3 + climate$Tmin[day]))
     VPD <-  (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
-    if(relativeHumidity==TRUE) VPD <-  (VPDx + VPDn) / 2 * (climate$relHum)
     
     #DayLength
     #gets fraction of day when sun is "up"
