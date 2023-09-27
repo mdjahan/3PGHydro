@@ -733,9 +733,18 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Age: daily age count, accounting for leap year
     lengthYear <- as.numeric(strftime(as.Date(paste0("31-12-",year),"%d-%m-%Y"),format = "%j"))
     StandAge <- StandAge + 1/lengthYear
+
+    #set zero again
+    WSext <- 0
+    Harvest_WS <- 0
+    Harvest_DBH <- 0
+    Harvest_Height <-  0
+    Harvest_Vol <- 0
+    StandVol_loss <- 0
+
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
-    if(MonthOneDayBefore!=currentMonth){
+    if(MonthOneDayBefore!=currentMonth){     
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
       if(StandAge >= attackAge & attackAge > 0){
         gammaNattack <- gammaN0attack * exp(-((StandAge - attackAge) * 12)/attackTime)
@@ -749,7 +758,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       
       #Perform any thinning events: performed at the beginning of the year
       nThin <- as.numeric(length(thinAges))
-      WSext <- 0
       if (thinEventNo <= nThin)  {
         if (StandAge >= thinAges[thinEventNo]) {
           if (StemNo > thinVals[thinEventNo]) { 
@@ -903,7 +911,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
                       avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
                       VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
                       Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
-                      WSextracted=sum$WSextracted,StandVol_loss=sum$StandVol_loss)
+                      Harvest_WS=,Harvest_DBH=,Harvest_Height=,Harvest_Vol=,StandVol_loss=)
   }
   return(out)
 }
