@@ -870,7 +870,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     BasArea <- ((avDBH / 200) ^ 2) * pi * StemNo
     if(HeightEquation==1) Height <-  aH * avDBH ^ nHB * StemNo ^ nHC
     if(HeightEquation==2) Height <- 1.3 + aH * exp(-nHB/avDBH) + nHC * Density * avDBH #Michajlow-Schumacher (Forrester et. al, 2021)
-    StandVol_loss <- 0
     if(SVEquation==1) StandVol <- WS * (1 - fracBB) / Density #3PG original equation
     if(SVEquation==2) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
     if(StandVol < oldV) StandVol_loss <- oldV - StandVol
@@ -887,7 +886,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
     out[day,2:27] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
-                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_Loss)) 
+                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_loss)) 
   }
   
   ###########################################################
@@ -911,7 +910,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
                       avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
                       VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
                       Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
-                      Harvest_WS=,Harvest_DBH=,Harvest_Height=,Harvest_Vol=,StandVol_loss=)
+                      Harvest_WS=sum$Harvest_WS,Harvest_DBH=sum$Harvest_DBH,Harvest_Height=sum$Harvest_Height,Harvest_Vol=sum$Harvest_Vol,StandVol_loss=sum$StandVol_loss)
   }
   return(out)
 }
