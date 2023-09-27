@@ -356,12 +356,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   oldV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=25))
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=27))
   colnames(out) <- c("Date","Year","StandAge","StemNo","WF","WR","WS","avDBH","Height","StandVol",
                      "LAI", "volWCer","ASWer","volWCdr","ASWdr",
                      "VolProduction_tot","BasalArea","GPP","NPP","NEE",
                      "Evapotranspiration","DeepPercolation","RunOff",
-                     "WSextracted","StandVol_loss")
+                     "Harvest_WS","Harvest_DBH","Harvest_Height","Harvest_Vol","StandVol_loss")
   out[1,1] <- as.character(date)
   out[1,2:15] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW))
   
@@ -754,12 +754,20 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         if (StandAge >= thinAges[thinEventNo]) {
           if (StemNo > thinVals[thinEventNo]) { 
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
+            Harvest_Stems <- StemNo * delN
             StemNo <- StemNo * (1 - delN)
             WF <- WF * (1 - delN * thinWF[thinEventNo])
             if(GDDcount>0){ WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])}
             WR <- WR * (1 - delN * thinWR[thinEventNo])
             WSext <- WS * delN * thinWS[thinEventNo]
             WS <- WS * (1 - delN * thinWS[thinEventNo])
+            #Harvest Info: WS, Vol, DBH, Height
+            Harvest_WS <- WSext
+            Harvest_DBH <- ((Harvest_WS*1000/Harvest_Stems) / aWs) ^ (1 / nWs)
+            if(HeightEquation==1) Harvest_Height <-  aH * Harvest_DBH ^ nHB * StemNo ^ nHC
+            if(HeightEquation==2) Harvest_Height <- 1.3 + aH * exp(-nHB/Harvest_DBH) + nHC * Density * Harvest_DBH #Michajlow-Schumacher (Forrester et. al, 2021)
+            if(SVEquation==1) Harvest_Vol <- Harvest_WS * (1 - fracBB) / Density #3PG original equation
+            if(SVEquation==2) Harvest_Vol <- aV * (Harvest_DBH ^ nVB) * (Harvest_Height ^ nVH) * Harvest_Stems #equation with parameters after Forrester et al. 2021
           }
           thinEventNo <- thinEventNo + 1
         }
@@ -870,8 +878,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:25] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
-                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,WSext,StandVol_loss)) 
+    out[day,2:27] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
+                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_Loss)) 
   }
   
   ###########################################################
