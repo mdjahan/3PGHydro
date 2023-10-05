@@ -192,7 +192,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   StandVol_loss <- 0
   WSselfThin <- 0
   WSMort <- 0
-  accV <- 0
   #Initial growing degree day sums 
   GDDS <- 0
   #StandVol_ext_single <- 0
