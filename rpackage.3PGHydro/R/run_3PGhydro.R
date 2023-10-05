@@ -885,7 +885,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:27] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
+    out[day,2:28] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
                                   BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_loss)) 
   }
   
