@@ -353,6 +353,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   if(SVEquation==1) StandVol <- WS * (1 - fracBB) / Density #3PG original equation
   if(SVEquation==2) StandVol <- aV * (avDBH ^ nVB) * (Height ^ nVH) * StemNo #equation with parameters after Forrester et al. 2021
   oldV <- StandVol
+  accV <- StandVol
   
   #Write first line of output (= Start conditions)
   out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=28))
