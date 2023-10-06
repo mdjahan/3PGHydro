@@ -393,7 +393,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #VPD is the difference (deficit) between the amount of moisture in the air and how much moisture the air can hold when it is saturated. 
     VPDx <- 6.1078 * exp(17.269 * climate$Tmax[day] / (237.3 + climate$Tmax[day]))
     VPDn <-  6.1078 * exp(17.269 * climate$Tmin[day] / (237.3 + climate$Tmin[day]))
-    VPD <- 0.5 * (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
+    VPD <- (VPDx + VPDn) / 2 #mean day-time VPD (vapour pressure deficit)
     
     #DayLength
     #gets fraction of day when sun is "up"
