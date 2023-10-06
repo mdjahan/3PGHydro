@@ -212,8 +212,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       maxInf <- 30 #maximum rainfall infiltration (mm/day)
     }
     if (SoilClass == 2){
-      SWconst	<- 0.2
-      SWpower	<- 12
+      SWconst	<- 0.7
+      SWpower	<- 9
       volRes <- 0.08
       volSat <- 0.4
       VGn <- 1.35
