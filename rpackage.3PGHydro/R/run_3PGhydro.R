@@ -744,6 +744,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
 
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
+    if(StemNo == 0){StemNo <- 0.001}
+    #
     if(MonthOneDayBefore!=currentMonth){     
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
       if(StandAge >= attackAge & attackAge > 0){
