@@ -744,7 +744,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
 
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
-    if(StemNo == 0){StemNo <- 0.001}
+    if(StemNo == 0){StemNo <- 1}
     #
     if(MonthOneDayBefore!=currentMonth){     
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
@@ -778,6 +778,10 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             if(HeightEquation==2) Harvest_Height <- 1.3 + aH * exp(-nHB/Harvest_DBH) + nHC * Density * Harvest_DBH #Michajlow-Schumacher (Forrester et. al, 2021)
             if(SVEquation==1) Harvest_Vol <- Harvest_WS * (1 - fracBB) / Density #3PG original equation
             if(SVEquation==2) Harvest_Vol <- aV * (Harvest_DBH ^ nVB) * (Harvest_Height ^ nVH) * Harvest_Stems #equation with parameters after Forrester et al. 2021
+            #check for too high dbh
+            AvStemMass <- WS * 1000 / StemNo
+            avDBH <- (AvStemMass / aWs) ^ (1 / nWs)
+            if(avDBH > 100){print("dbh too high"}
           }
           thinEventNo <- thinEventNo + 1
         }
