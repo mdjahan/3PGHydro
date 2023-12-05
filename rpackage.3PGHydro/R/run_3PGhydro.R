@@ -781,7 +781,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             #check for too high dbh
             AvStemMass <- WS * 1000 / StemNo
             avDBH <- (AvStemMass / aWs) ^ (1 / nWs)
-            if(avDBH > 100){print("dbh too high"}
+            if(avDBH > 100){print("dbh too high")}
           }
           thinEventNo <- thinEventNo + 1
         }
