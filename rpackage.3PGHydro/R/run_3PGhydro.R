@@ -775,7 +775,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
           }
             }
             if(thinVals<=1){ #thinning with percentage of trees taken out
-            Harvest_Stems <- round(StemNo*thinVals[thinEventNo],0))
+            Harvest_Stems <- round(StemNo*thinVals[thinEventNo],0)
             delN <- Harvest_Stems/StemNo
             StemNo <- StemNo - Harvest_Stems
             WF <- WF * (1 - delN * thinWF[thinEventNo])
