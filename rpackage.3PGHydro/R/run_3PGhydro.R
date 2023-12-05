@@ -754,7 +754,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       nThin <- as.numeric(length(thinAges))
       if (thinEventNo <= nThin)  {
         if (StandAge >= thinAges[thinEventNo]) {
-          if(thinVals>1){ #thinning with numbers of trees left in stand
+          if(thinVals[thinEventNo]>1){ #thinning with numbers of trees left in stand
             if (StemNo > thinVals[thinEventNo]) { 
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             Harvest_Stems <- StemNo * delN
@@ -777,7 +777,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             if(avDBH > 100){print("dbh too high")}
           }
             }
-            if(thinVals<=1){ #thinning with percentage of trees taken out
+            if(thinVals[thinEventNo]<=1){ #thinning with percentage of trees taken out
             Harvest_Stems <- round(StemNo*thinVals[thinEventNo],0)
             delN <- Harvest_Stems/StemNo
             StemNo <- StemNo - Harvest_Stems
