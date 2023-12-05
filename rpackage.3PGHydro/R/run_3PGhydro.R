@@ -797,7 +797,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             }
           thinEventNo <- thinEventNo + 1
         }
-      
+      }
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
       mortality_stems <- 0
       if(StandAge >= attackAge & attackAge > 0){
