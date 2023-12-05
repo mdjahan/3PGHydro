@@ -356,12 +356,12 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   accV <- StandVol
   
   #Write first line of output (= Start conditions)
-  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=29))
+  out <- as.data.frame(matrix(data=NA,nrow=Duration,ncol=30))
   colnames(out) <- c("Date","Year","StandAge","StemNo","WF","WR","WS","avDBH","Height","StandVol",
                      "LAI", "volWCer","ASWer","volWCdr","ASWdr",
                      "VolProduction_tot","BasalArea","GPP","NPP","NEE",
                      "Evapotranspiration","DeepPercolation","RunOff",
-                     "Harvest_Stems","Harvest_WS","Harvest_DBH","Harvest_Height","Harvest_Vol","StandVol_loss")
+                     "Harvest_Stems","Harvest_WS","Harvest_DBH","Harvest_Height","Harvest_Vol","StandVol_loss","mortality_stems")
   out[1,1] <- as.character(date)
   out[1,2:15] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW))
   
@@ -746,18 +746,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #Bark beetle attack, Thinning & Mortality: At the end of each month
     if(StemNo > 0){
     #
-    if(MonthOneDayBefore!=currentMonth){     
-      #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
-      if(StandAge >= attackAge & attackAge > 0){
-        gammaNattack <- gammaN0attack * exp(-((StandAge - attackAge) * 12)/attackTime)
-        delStems <- gammaNattack * StemNo / 100
-        WF <- WF - mF * delStems * (WF / StemNo)
-        WR <- WR - mR * delStems * (WR / StemNo)
-        WS<- WS - mS * delStems * (WS / StemNo)
-        StemNo <- StemNo - delStems
-        mortality <- mortality + delStems
-      }
-      
+    if(MonthOneDayBefore!=currentMonth){         
       #Perform any thinning events: performed at the beginning of the year
       nThin <- as.numeric(length(thinAges))
       if (thinEventNo <= nThin)  {
@@ -809,9 +798,20 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
           thinEventNo <- thinEventNo + 1
         }
       
+      #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
+      mortality_stems <- 0
+      if(StandAge >= attackAge & attackAge > 0){
+        gammaNattack <- gammaN0attack * exp(-((StandAge - attackAge) * 12)/attackTime)
+        delStems <- gammaNattack * StemNo / 100
+        WF <- WF - mF * delStems * (WF / StemNo)
+        WR <- WR - mR * delStems * (WR / StemNo)
+        WS<- WS - mS * delStems * (WS / StemNo)
+        StemNo <- StemNo - delStems
+        mortality_stems <- mortality_stems + delStems
+      }
+        
       #Calculate age and stress-related mortality
       delStems <- 0
-      mortality_stems <- 0
       WSMort <- 0
       if (tgammaN != 0) {
         gammaN <- gammaN1 + (gammaN0 - gammaN1)*exp(-log(2)*(StandAge/tgammaN)^ngammaN)
@@ -830,7 +830,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       }
       
       #Calculate self-thinning mortality
-      selfThin_Stems <- 0
       WSselfThin <- 0
       wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower #(1000 / StemNo) ^ thinPower can be seen as a factor/ empirical relationship determining how soon selfthinnning starts
       AvStemMass <- WS * 1000 / StemNo #transform Ws into kg/tree
@@ -857,7 +856,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         StemNo <- StemNo - delStems
         wSmax <- wSx1000 * (1000 / StemNo) ^ thinPower
         AvStemMass <- WS * 1000 / StemNo
-        selfThin_Stems <- selfThin_Stems + delStems
+        mortality_stems <- mortality_stems + delStems
       }
          }    
   
@@ -913,8 +912,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
-    out[day,2:29] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
-                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_Stems,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_loss)) 
+    out[day,2:30] <- as.numeric(c(year,StandAge,StemNo,WF,WR,WS,avDBH,Height,StandVol,LAI,volWer,erASW,volWdr,drASW,VolProduction_tot,
+                                  BasArea,GPP,NPP,NEE,EvapTransp,DP,RunOff,Harvest_Stems,Harvest_WS,Harvest_DBH,Harvest_Height,Harvest_Vol,StandVol_loss,mortality_stems)) 
   }
   
   ###########################################################
@@ -938,7 +937,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
                       avDBH=endYear$avDBH,Height=endYear$Height,StandVol=endYear$StandVol,LAI=mean$LAI,volWCer=mean$volWCer,ASWer=mean$ASWer,volWCdr=mean$volWCdr,ASWdr=mean$ASWdr,
                       VolProduction_tot=endYear$VolProduction_tot,BasalArea=endYear$BasalArea,GPP=sum$GPP,NPP=sum$NPP,NEE=sum$NEE, 
                       Evapotranspiration=sum$Evapotranspiration,DeepPercolation=sum$DeepPercolation,RunOff=sum$RunOff,
-                      Harvest_Stems=sum$Harvest_Stems,Harvest_WS=sum$Harvest_WS,Harvest_DBH=sum$Harvest_DBH,Harvest_Height=sum$Harvest_Height,Harvest_Vol=sum$Harvest_Vol,StandVol_loss=sum$StandVol_loss)
+                      Harvest_Stems=sum$Harvest_Stems,Harvest_WS=sum$Harvest_WS,Harvest_DBH=sum$Harvest_DBH,Harvest_Height=sum$Harvest_Height,Harvest_Vol=sum$Harvest_Vol,StandVol_loss=sum$StandVol_loss,mortality_stems=sum$mortality_stems)
   }
   return(out)
 }
