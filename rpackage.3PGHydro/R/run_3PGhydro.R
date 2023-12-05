@@ -21,7 +21,7 @@
 #' @param RocksER share of rocks/skeleton in effective root zone (0-1) 0:none, 1:all
 #' @param RocksDR share of rocks/skeleton in deep root zone (0-1) 0:none, 1:all
 #' @param thinAges ages at which thinning should be applied, in case of no thinning: NULL
-#' @param thinVals number of stems left after thinning, in case of no thinning: NULL
+#' @param thinVals number of stems left after thinning or % of tsems thinned [0-1], in case of no thinning: NULL
 #' @param thinWF thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWR thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
 #' @param thinWS thinning regime foliage below to above (0.5 - 1.5), in case of no thinning: NULL
