@@ -741,6 +741,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     Harvest_Height <-  0
     Harvest_Vol <- 0
     StandVol_loss <- 0
+    Harvest_Stems <- 0
+    mortality_stems <- 0
+    
 
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
