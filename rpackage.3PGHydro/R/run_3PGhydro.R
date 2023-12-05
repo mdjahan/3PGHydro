@@ -744,7 +744,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
 
     
     #Bark beetle attack, Thinning & Mortality: At the end of each month
-    if(StemNo == 0){StemNo <- 1}
+    if(StemNo > 0){
     #
     if(MonthOneDayBefore!=currentMonth){     
       #Bark Beetle Attack, from Meyer et al. (2017) (could think to start it in april/may)
@@ -808,7 +808,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             }
           thinEventNo <- thinEventNo + 1
         }
-      }
       
       #Calculate age and stress-related mortality
       delStems <- 0
@@ -860,8 +859,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
         AvStemMass <- WS * 1000 / StemNo
         selfThin <- selfThin + delStems
       }
-    }
-    
+         }    
+  
     ##################################################################
     #update age dependent factors
     #SLA = expF(StandAge, SLA0, SLA1, tSLA, 2)
@@ -910,7 +909,7 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     
     #MAI
     #MAI <- (StandVol + StandVol_ext)/StandAge
-    
+    }
     #WF in kg per tree
     #WFtree <- WF *1000 /StemNo
     out[day,1] <- as.character(date)
