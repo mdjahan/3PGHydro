@@ -762,7 +762,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       nThin <- as.numeric(length(thinAges))
       if (thinEventNo <= nThin)  {
         if (StandAge >= thinAges[thinEventNo]) {
-          if (StemNo > thinVals[thinEventNo]) { 
+          if(thinVals>1){ #thinning with numbers of trees left in stand
+            if (StemNo > thinVals[thinEventNo]) { 
             delN <- (StemNo - thinVals[thinEventNo]) / StemNo
             Harvest_Stems <- StemNo * delN
             StemNo <- StemNo * (1 - delN)
@@ -783,6 +784,28 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
             avDBH <- (AvStemMass / aWs) ^ (1 / nWs)
             if(avDBH > 100){print("dbh too high")}
           }
+            }
+            if(thinVals<=1){ #thinning with percentage of trees taken out
+            Harvest_Stems <- round(StemNo*thinVals[thinEventNo],0))
+            delN <- Harvest_Stems/StemNo
+            StemNo <- StemNo - Harvest_Stems
+            WF <- WF * (1 - delN * thinWF[thinEventNo])
+            if(GDDcount>0){ WFprior <- WFprior * (1 - delN * thinWF[thinEventNo])}
+            WR <- WR * (1 - delN * thinWR[thinEventNo])
+            WSext <- WS * delN * thinWS[thinEventNo]
+            WS <- WS * (1 - delN * thinWS[thinEventNo])
+            #Harvest Info: WS, Vol, DBH, Height
+            Harvest_WS <- WSext
+            Harvest_DBH <- ((Harvest_WS*1000/Harvest_Stems) / aWs) ^ (1 / nWs)
+            if(HeightEquation==1) Harvest_Height <-  aH * Harvest_DBH ^ nHB * StemNo ^ nHC
+            if(HeightEquation==2) Harvest_Height <- 1.3 + aH * exp(-nHB/Harvest_DBH) + nHC * Density * Harvest_DBH #Michajlow-Schumacher (Forrester et. al, 2021)
+            if(SVEquation==1) Harvest_Vol <- Harvest_WS * (1 - fracBB) / Density #3PG original equation
+            if(SVEquation==2) Harvest_Vol <- aV * (Harvest_DBH ^ nVB) * (Harvest_Height ^ nVH) * Harvest_Stems #equation with parameters after Forrester et al. 2021
+            #check for too high dbh
+            AvStemMass <- WS * 1000 / StemNo
+            avDBH <- (AvStemMass / aWs) ^ (1 / nWs)
+            if(avDBH > 100){print("dbh too high")}
+            }
           thinEventNo <- thinEventNo + 1
         }
       }
