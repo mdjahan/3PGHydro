@@ -238,8 +238,8 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
     }
   }
   #SWpower & SWconst -> Original: SWconst (0.8, 0.7, 0.5, 0.4), SWpower (12, 9, 5, 4)
-  SWconst	<- 5
-  SWpower	<- 0.5
+  SWconst	<- 0.5
+  SWpower	<- 5
   #Soil Depth
   depthER <- EffectiveRootZoneDepth
   depthDR <- DeepRootZoneDepth
