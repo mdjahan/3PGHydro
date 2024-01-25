@@ -201,8 +201,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   if (SoilClass > 0) {
     #3PG Hydro Soil Class Parameters
     if (SoilClass == 1){
-      SWconst	<- 0.8 #3PG Original
-      SWpower	<- 12 #3PG Original
       volRes <- 0.02 #vol. residual water content
       volSat <- 0.38 #vol. saturation water content
       VGn <- 1.55 #Van-Genuchten n
@@ -212,8 +210,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       maxInf <- 30 #maximum rainfall infiltration (mm/day)
     }
     if (SoilClass == 2){
-      SWconst	<- 0.7
-      SWpower	<- 9
       volRes <- 0.08
       volSat <- 0.4
       VGn <- 1.35
@@ -223,8 +219,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       maxInf <- 25
     }
     if (SoilClass == 3){
-      SWconst	<- 0.5
-      SWpower	<- 5
       volRes <- 0.1
       volSat <- 0.44
       VGn <- 1.25
@@ -234,8 +228,6 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       maxInf <- 20
     }
     if (SoilClass == 4){
-      SWconst	<- 4
-      SWpower	<- 0.4
       volRes <- 0.12
       volSat <- 0.5
       VGn <- 1.1
@@ -245,6 +237,9 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
       maxInf <- 15
     }
   }
+  #SWpower & SWconst -> Original: SWconst (0.8, 0.7, 0.5, 0.4), SWpower (12, 9, 5, 4)
+  SWconst	<- 5
+  SWpower	<- 0.5
   #Soil Depth
   depthER <- EffectiveRootZoneDepth
   depthDR <- DeepRootZoneDepth
