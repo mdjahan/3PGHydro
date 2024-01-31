@@ -240,20 +240,16 @@ run_3PGhydro <- function(climate,p,lat,StartDate,StandAgei,EndAge,WFi,WRi,WSi,St
   
   #SWpower & SWconst -> Now drought tolerance (1: low, 4: high)
     if (droughtTolerance == 1){
-  SWconst	<- 0.4
-  SWpower	<- 4
+  SWconst	<- 0.45
+  SWpower	<- 5
     }
     if (droughtTolerance == 2){
-  SWconst	<- 0.5
+  SWconst	<- 0.55
   SWpower	<- 5
     }
     if (droughtTolerance == 3){
-  SWconst	<- 0.6
-  SWpower	<- 6
-    }
-    if (droughtTolerance == 4){
-  SWconst	<- 0.7
-  SWpower	<- 7
+  SWconst	<- 0.65
+  SWpower	<- 5
     }
   
   #Soil Depth
