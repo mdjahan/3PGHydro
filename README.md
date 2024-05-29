@@ -1,4 +1,8 @@
-# 3-PG-Hydro V1.1
+# 3-PG-Hydro V2
+New code will be released soon.
+Major update of version two is the integration of 3-PGmix (Forrester, 2014 (https://doi.org/10.1016/j.ecolmodel.2013.12.021); Forrester et al., 2014 (https://doi.org/10.1186/s40663-014-0017-0); Forrester & Tang, 2016 (https://doi.org/10.1016/j.ecolmodel.2015.07.010); Trotsiuk et al., 2020 (https://doi.org/10.1111/2041-210X.13474)).
+
+## V1.1
 3-PG-Hydro is available as an R-package, Coding by Anja Nölte & Marc Djahangard.
 
 3-PG-Hydro is an update of the original 3-PG Forest Growth model by Landsberg and Waring (1997) (https://doi.org/10.1016/S0378-1127(97)00026-1). 3-PG-Hydro calculates on a daily timestep, includes a soil-water-model, seperated soil evaporation calculation as well as a snow routine. Further information in the publication on 3-PG-Hydro by Yousefpour and Djahangard (2021) (https://doi.org/10.3390/f12121729).
