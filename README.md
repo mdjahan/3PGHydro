@@ -1,6 +1,8 @@
 # 3-PG-Hydro V2
 New code will be released soon.
+
 Version 2 integrates main parts of 3-PGmix (Forrester, 2014 (https://doi.org/10.1016/j.ecolmodel.2013.12.021); Forrester et al., 2014 (https://doi.org/10.1186/s40663-014-0017-0); Forrester & Tang, 2016 (https://doi.org/10.1016/j.ecolmodel.2015.07.010); Trotsiuk et al., 2020 (https://doi.org/10.1111/2041-210X.13474)).
+This includes light concurrency by simulation of light absorption processes with vertically and horizontally heterogeneous canopies. Moreover, concurrency for soil water, trees with deeper tooting system can thus have more exccess in a mixed stand.
 
 ## V1.1
 3-PG-Hydro is available as an R-package, Coding by Anja Nölte & Marc Djahangard.
